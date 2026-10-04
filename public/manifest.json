@@ -1,0 +1,20 @@
+{
+  "short_name": "LEKalendarz",
+  "name": "LEKalendarz - Miej leki pod kontrolą",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#20602C",
+  "background_color": "#15202b"
+}

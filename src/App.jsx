@@ -1,107 +1,107 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const baseDrugs = [
-  { id: 1, name: "Paracetamol", substance: "Paracetamolum", producer: "Różni producenci", doses: [500, 1000], unit: "mg", description: "Lek o działaniu przeciwbólowym i przeciwgorączkowym. Nie wykazuje działania przeciwzapalnego. Bezpieczny dla żołądka, ale w dużych dawkach obciąża wątrobę." },
-  { id: 2, name: "Ibuprofen", substance: "Ibuprofenum", producer: "Różni producenci", doses: [200, 400, 600], unit: "mg", description: "Niesteroidowy lek przeciwzapalny (NLPZ). Działa przeciwzapalnie, przeciwbólowo i przeciwgorączkowo. Stosować ostrożnie przy chorobie wrzodowej." },
-  { id: 3, name: "Ketoprofen", substance: "Ketoprofenum", producer: "Sandoz", doses: [50, 100], unit: "mg", description: "Silny lek z grupy NLPZ. Stosowany w bólach pourazowych, reumatycznych i bólach mięśni. Silnie drażni śluzówkę żołądka." },
-  { id: 4, name: "Diklofenak", substance: "Diclofenacum", producer: "GSK", doses: [25, 50, 75, 100], unit: "mg", description: "Lek przeciwzapalny i przeciwbólowy, często stosowany w bólach stawów, chorobach reumatoidalnych i stanach zapalnych tkanek miękkich." },
-  { id: 5, name: "Naproksen", substance: "Naproxenum", producer: "Hasco-Lek", doses: [220, 250, 500], unit: "mg", description: "Długodziałający lek przeciwbólowy i przeciwzapalny. Polecany w bólach zębów, bólach menstruacyjnych oraz bólach stawów." },
-  { id: 6, name: "Meloksykam", substance: "Meloxicamum", producer: "Teva", doses: [7.5, 15], unit: "mg", description: "Lek przeciwzapalny nowszej generacji. W mniejszym stopniu drażni żołądek. Stosowany głównie w reumatoidalnym zapaleniu stawów." },
-  { id: 7, name: "Tramadol", substance: "Tramadoli hydrochloridum", producer: "Polpharma", doses: [50, 100, 150, 200], unit: "mg", description: "Silny, opioidowy lek przeciwbólowy o działaniu ośrodkowym. Stosowany w bólach o nasileniu umiarkowanym do dużego. Może powodować zawroty głowy." },
-  { id: 8, name: "Morfina", substance: "Morphinum", producer: "WZF Polfa", description: "Bardzo silny lek opioidowy stosowany w bólach nowotworowych, pooperacyjnych i zawałowych. Wymaga ścisłej kontroli lekarskiej." },
-  { id: 9, name: "Kodeina", substance: "Codeinum", producer: "GlaxoSmithKline", description: "Słaby opioid o działaniu przeciwbólowym oraz silnym działaniu przeciwkaszlowym. Często łączony z paracetamolem." },
+const localDrugsDb = [
+  { id: 1, name: "Paracetamol", substance: "Paracetamolum", producer: "Różni producenci", doses: [500, 1000], unit: "mg", description: "Lek o działaniu przeciwbólowym i przeciwgorączkowym. Nie wykazuje działania przeciwzapalnego. Bezpieczny dla żołądka." },
+  { id: 2, name: "Ibuprofen", substance: "Ibuprofenum", producer: "Różni producenci", doses: [200, 400, 600], unit: "mg", description: "Niesteroidowy lek przeciwzapalny (NLPZ). Działa przeciwzapalnie, przeciwbólowo i przeciwgorączkowo." },
+  { id: 3, name: "Ketoprofen", substance: "Ketoprofenum", producer: "Sandoz", doses: [50, 100], unit: "mg", description: "Silny lek z grupy NLPZ. Stosowany w bólach pourazowych, reumatycznych i bólach mięśni." },
+  { id: 4, name: "Diklofenak", substance: "Diclofenacum", producer: "GSK", doses: [25, 50, 75, 100], unit: "mg", description: "Lek przeciwzapalny i przeciwbólowy, często stosowany w bólach stawów, chorobach reumatoidalnych." },
+  { id: 5, name: "Naproksen", substance: "Naproxenum", producer: "Hasco-Lek", doses: [220, 250, 500], unit: "mg", description: "Długodziałający lek przeciwbólowy i przeciwzapalny. Polecany w bólach menstruacyjnych oraz bólach stawów." },
+  { id: 6, name: "Meloksykam", substance: "Meloxicamum", producer: "Teva", doses: [7.5, 15], unit: "mg", description: "Lek przeciwzapalny nowszej generacji. Stosowany głównie w reumatoidalnym zapaleniu stawów." },
+  { id: 7, name: "Tramadol", substance: "Tramadoli hydrochloridum", producer: "Polpharma", doses: [50, 100, 150, 200], unit: "mg", description: "Silny, opioidowy lek przeciwbólowy o działaniu ośrodkowym. Stosowany w bólach o nasileniu umiarkowanym do dużego." },
+  { id: 8, name: "Morfina", substance: "Morphinum", producer: "WZF Polfa", description: "Bardzo silny lek opioidowy stosowany w bólach nowotworowych, pooperacyjnych i zawałowych." },
+  { id: 9, name: "Kodeina", substance: "Codeinum", producer: "GlaxoSmithKline", description: "Słaby opioid o działaniu przeciwbólowym oraz silnym działaniu przeciwkaszlowym." },
   { id: 10, name: "Buprenorfina", substance: "Buprenorphinum", producer: "Zentiva", description: "Silny opioid stosowany w leczeniu silnego bólu oraz w terapii zastępczej uzależnień od opiatów." },
-  { id: 11, name: "Amoksycylina", substance: "Amoxicillinum", producer: "Polpharma", doses: [500, 1000], unit: "mg", description: "Antybiotyk z grupy penicylin. Szerokie spektrum działania, często stosowany w zapaleniach dróg oddechowych, ucha środkowego i zatok." },
+  { id: 11, name: "Amoksycylina", substance: "Amoxicillinum", producer: "Polpharma", doses: [500, 1000], unit: "mg", description: "Antybiotyk z grupy penicylin. Szerokie spektrum działania, często stosowany w zapaleniach dróg oddechowych." },
   { id: 12, name: "Azytromycyna", substance: "Azithromycinum", producer: "Teva", doses: [250, 500], unit: "mg", description: "Antybiotyk makrolidowy. Kumuluje się w tkankach, co pozwala na krótkie, zazwyczaj 3-dniowe kuracje." },
-  { id: 13, name: "Cyprofloksacyna", substance: "Ciprofloxacinum", producer: "Bayer", doses: [250, 500], unit: "mg", description: "Chemioterapeutyk z grupy fluorochinolonów. Skuteczny głównie w zakażeniach dróg moczowych oraz ciężkich infekcjach ogólnoustrojowych." },
-  { id: 14, name: "Doksycyklina", substance: "Doxycyclinum", producer: "Polfa Tarchomin", doses: [100], unit: "mg", description: "Antybiotyk tetracyklinowy. Stosowany w leczeniu boreliozy, zakażeń atypowych i trądziku. Powoduje nadwrażliwość na słońce." },
+  { id: 13, name: "Cyprofloksacyna", substance: "Ciprofloxacinum", producer: "Bayer", doses: [250, 500], unit: "mg", description: "Chemioterapeutyk z grupy fluorochinolonów. Skuteczny głównie w zakażeniach dróg moczowych." },
+  { id: 14, name: "Doksycyklina", substance: "Doxycyclinum", producer: "Polfa Tarchomin", doses: [100], unit: "mg", description: "Antybiotyk tetracyklinowy. Stosowany w leczeniu boreliozy, zakażeń atypowych i trądziku." },
   { id: 15, name: "Cefuroksym", substance: "Cefuroximum", producer: "Sandoz", doses: [250, 500], unit: "mg", description: "Antybiotyk cefalosporynowy II generacji. Wykorzystywany w infekcjach dróg oddechowych, moczowych i zakażeniach skóry." },
-  { id: 16, name: "Klarytromycyna", substance: "Clarithromycinum", producer: "Abbott", doses: [250, 500], unit: "mg", description: "Makrolid stosowany jako alternatywa dla penicylin. Skuteczny m.in. w leczeniu wrzodów żołądka (eradykacja Helicobacter pylori)." },
-  { id: 17, name: "Metronidazol", substance: "Metronidazolum", producer: "Polpharma", doses: [250, 500], unit: "mg", description: "Lek przeciwbakteryjny i przeciwpierwotniakowy. Bezwzględnie zabrania się łączenia go z alkoholem (reakcja disulfiramowa)." },
-  { id: 18, name: "Klindamycyna", substance: "Clindamycinum", producer: "MIP Pharma", doses: [300, 600], unit: "mg", description: "Antybiotyk linkozamidowy. Skuteczny w zakażeniach kości, stawów i zębów, ale niesie ryzyko poantybiotykowego zapalenia jelit." },
+  { id: 16, name: "Klarytromycyna", substance: "Clarithromycinum", producer: "Abbott", doses: [250, 500], unit: "mg", description: "Makrolid stosowany jako alternatywa dla penicylin. Skuteczny m.in. w leczeniu wrzodów żołądka." },
+  { id: 17, name: "Metronidazol", substance: "Metronidazolum", producer: "Polpharma", doses: [250, 500], unit: "mg", description: "Lek przeciwbakteryjny i przeciwpierwotniakowy. Bezwzględnie zabrania się łączenia go z alkoholem." },
+  { id: 18, name: "Klindamycyna", substance: "Clindamycinum", producer: "MIP Pharma", doses: [300, 600], unit: "mg", description: "Antybiotyk linkozamidowy. Skuteczny w zakażeniach kości, stawów i zębów." },
   { id: 19, name: "Ceftriakson", substance: "Ceftriaxonum", producer: "Sandoz", description: "Antybiotyk cefalosporynowy III generacji. Podawany w iniekcjach, skuteczny w bardzo ciężkich zakażeniach szpitalnych." },
   { id: 20, name: "Lewofloksacyna", substance: "Levofloxacinum", producer: "Sanofi", doses: [250, 500], unit: "mg", description: "Silny fluorochinolon stosowany w zapaleniach płuc i powikłanych zakażeniach dróg moczowych." },
-  { id: 21, name: "Bisoprolol", substance: "Bisoprololum", producer: "Merck", doses: [2.5, 5, 10], unit: "mg", description: "Kardioselektywny beta-bloker. Zwalnia rytm serca i obniża ciśnienie tętnicze. Stosowany w niewydolności serca i nadciśnieniu." },
+  { id: 21, name: "Bisoprolol", substance: "Bisoprololum", producer: "Merck", doses: [2.5, 5, 10], unit: "mg", description: "Kardioselektywny beta-bloker. Zwalnia rytm serca i obniża ciśnienie tętnicze." },
   { id: 22, name: "Metoprolol", substance: "Metoprololum", producer: "AstraZeneca", doses: [25, 50, 100], unit: "mg", description: "Beta-bloker. Zapobiega bólom dławicowym, obniża ciśnienie i reguluje rytm serca po zawale." },
-  { id: 23, name: "Nebiwolol", substance: "Nebivololum", producer: "Berlin-Chemie", doses: [5], unit: "mg", description: "Nowoczesny beta-bloker, który dodatkowo rozszerza naczynia krwionośne, co poprawia ogólne krążenie i tolerancję wysiłku." },
-  { id: 24, name: "Amlodypina", substance: "Amlodipinum", producer: "Pfizer", doses: [5, 10], unit: "mg", description: "Bloker kanału wapniowego. Rozkurcza naczynia krwionośne, skutecznie obniżając ciśnienie. Może powodować obrzęki kostek." },
-  { id: 25, name: "Ramipryl", substance: "Ramiprilum", producer: "Sanofi", doses: [2.5, 5, 10], unit: "mg", description: "Lek z grupy inhibitorów ACE. Podstawowy lek w nadciśnieniu i niewydolności serca. Może wywoływać suchy, uporczywy kaszel." },
+  { id: 23, name: "Nebiwolol", substance: "Nebivololum", producer: "Berlin-Chemie", doses: [5], unit: "mg", description: "Nowoczesny beta-bloker, który dodatkowo rozszerza naczynia krwionośne." },
+  { id: 24, name: "Amlodypina", substance: "Amlodipinum", producer: "Pfizer", doses: [5, 10], unit: "mg", description: "Bloker kanału wapniowego. Rozkurcza naczynia krwionośne, skutecznie obniżając ciśnienie." },
+  { id: 25, name: "Ramipryl", substance: "Ramiprilum", producer: "Sanofi", doses: [2.5, 5, 10], unit: "mg", description: "Lek z grupy inhibitorów ACE. Podstawowy lek w nadciśnieniu i niewydolności serca." },
   { id: 26, name: "Peryndopryl", substance: "Perindoprilum", producer: "Servier", doses: [4, 5, 8, 10], unit: "mg", description: "Inhibitor konwertazy angiotensyny (ACEI). Chroni naczynia krwionośne, zapobiega powikłaniom sercowo-naczyniowym." },
-  { id: 27, name: "Losartan", substance: "Losartanum", producer: "Krka", doses: [50, 100], unit: "mg", description: "Sartan (bloker receptora angiotensyny). Obniża ciśnienie. Świetna alternatywa dla pacjentów, którzy kaszlą po inhibitorach ACE." },
+  { id: 27, name: "Losartan", substance: "Losartanum", producer: "Krka", doses: [50, 100], unit: "mg", description: "Sartan (bloker receptora angiotensyny). Obniża ciśnienie." },
   { id: 28, name: "Walsartan", substance: "Valsartanum", producer: "Novartis", doses: [80, 160], unit: "mg", description: "Lek hipotensyjny z grupy sartanów. Chroni serce i nerki u pacjentów z nadciśnieniem i cukrzycą." },
-  { id: 29, name: "Atorwastatyna", substance: "Atorvastatinum", producer: "Pfizer", doses: [10, 20, 40, 80], unit: "mg", description: "Silna statyna obniżająca poziom cholesterolu (LDL) i trójglicerydów. Zmniejsza ryzyko zawału." },
-  { id: 30, name: "Rozuwastatyna", substance: "Rosuvastatinum", producer: "AstraZeneca", doses: [5, 10, 20, 40], unit: "mg", description: "Najsilniejsza dostępna statyna. Bardzo skutecznie obniża poziom lipidów we krwi i stabilizuje blaszkę miażdżycową." },
+  { id: 29, name: "Atorwastatyna", substance: "Atorvastatinum", producer: "Pfizer", doses: [10, 20, 40, 80], unit: "mg", description: "Silna statyna obniżająca poziom cholesterolu (LDL) i trójglicerydów." },
+  { id: 30, name: "Rozuwastatyna", substance: "Rosuvastatinum", producer: "AstraZeneca", doses: [5, 10, 20, 40], unit: "mg", description: "Najsilniejsza dostępna statyna. Bardzo skutecznie obniża poziom lipidów we krwi." },
   { id: 31, name: "Symwastatyna", substance: "Simvastatinum", producer: "Teva", doses: [20, 40], unit: "mg", description: "Starsza, ale sprawdzona statyna obniżająca poziom cholesterolu. Należy przyjmować ją wieczorem." },
-  { id: 32, name: "Furosemid", substance: "Furosemidum", producer: "Polpharma", doses: [40], unit: "mg", description: "Silny lek moczopędny (diuretyk pętlowy). Gwałtownie odwadnia, stosowany w obrzękach płuc, niewydolności serca i nerek." },
-  { id: 33, name: "Torasemid", substance: "Torasemidum", producer: "Sandoz", doses: [5, 10], unit: "mg", description: "Nowocześniejszy odpowiednik furosemidu. Działa dłużej i równomierniej, co zmniejsza częstotliwość korzystania z toalety." },
+  { id: 32, name: "Furosemid", substance: "Furosemidum", producer: "Polpharma", doses: [40], unit: "mg", description: "Silny lek moczopędny (diuretyk pętlowy). Gwałtownie odwadnia." },
+  { id: 33, name: "Torasemid", substance: "Torasemidum", producer: "Sandoz", doses: [5, 10], unit: "mg", description: "Nowocześniejszy odpowiednik furosemidu. Działa dłużej i równomierniej." },
   { id: 34, name: "Spironolakton", substance: "Spironolactonum", producer: "Gedeon Richter", doses: [25, 50, 100], unit: "mg", description: "Lek moczopędny oszczędzający potas. Stosowany w niewydolności serca i marskości wątroby." },
-  { id: 35, name: "Indapamid", substance: "Indapamidum", producer: "Servier", doses: [1.5, 2.5], unit: "mg", description: "Łagodny diuretyk stosowany głównie w leczeniu nadciśnienia tętniczego. Rozszerza drobne naczynia krwionośne." },
-  { id: 36, name: "Omeprazol", substance: "Omeprazolum", producer: "Polpharma", doses: [20, 40], unit: "mg", description: "Inhibitor pompy protonowej (IPP). Hamuje wydzielanie kwasu solnego w żołądku. Stosowany w zgadze i chorobie wrzodowej." },
-  { id: 37, name: "Pantoprazol", substance: "Pantoprazolum", producer: "Takeda", doses: [20, 40], unit: "mg", description: "Bezpieczny i skuteczny IPP. Wchodzi w mniej interakcji z innymi lekami niż omeprazol. Idealny osłonowo." },
-  { id: 38, name: "Lanzoprazol", substance: "Lansoprazolum", producer: "Krka", doses: [15, 30], unit: "mg", description: "Szybko działający lek zmniejszający wydzielanie kwasu żołądkowego. Przynosi ulgę w refluksie." },
-  { id: 39, name: "Famotydyna", substance: "Famotidinum", producer: "Polfa", description: "Bloker receptora H2. Hamuje wydzielanie kwasu żołądkowego, często stosowany w lekkiej zgadze." },
+  { id: 35, name: "Indapamid", substance: "Indapamidum", producer: "Servier", doses: [1.5, 2.5], unit: "mg", description: "Łagodny diuretyk stosowany głównie w leczeniu nadciśnienia tętniczego." },
+  { id: 36, name: "Omeprazol", substance: "Omeprazolum", producer: "Polpharma", doses: [20, 40], unit: "mg", description: "Inhibitor pompy protonowej (IPP). Hamuje wydzielanie kwasu solnego w żołądku." },
+  { id: 37, name: "Pantoprazol", substance: "Pantoprazolum", producer: "Takeda", doses: [20, 40], unit: "mg", description: "Bezpieczny i skuteczny IPP. Wchodzi w mniej interakcji z innymi lekami niż omeprazol." },
+  { id: 38, name: "Lanzoprazol", substance: "Lansoprazolum", producer: "Krka", doses: [15, 30], unit: "mg", description: "Szybko działający lek zmniejszający wydzielanie kwasu żołądkowego." },
+  { id: 39, name: "Famotydyna", substance: "Famotidinum", producer: "Polfa", description: "Bloker receptora H2. Hamuje wydzielanie kwasu żołądkowego." },
   { id: 40, name: "Loperamid", substance: "Loperamidum", producer: "Janssen", doses: [2], unit: "mg", description: "Szybki i skuteczny lek hamujący perystaltykę jelit, stosowany w leczeniu objawów nagłej biegunki." },
   { id: 41, name: "Metformina", substance: "Metforminum", producer: "Merck", doses: [500, 850, 1000], unit: "mg", description: "Lek pierwszego wyboru w cukrzycy typu 2. Zmniejsza insulinooporność, pomaga w kontroli masy ciała." },
-  { id: 42, name: "Glimepiryd", substance: "Glimepiridum", producer: "Sanofi", doses: [1, 2, 3, 4], unit: "mg", description: "Pochodna sulfonylomocznika. Zmusza trzustkę do zwiększonej produkcji insuliny. Niesie ryzyko niedocukrzenia (hipoglikemii)." },
-  { id: 43, name: "Gliklazyd", substance: "Gliclazidum", producer: "Servier", doses: [30, 60], unit: "mg", description: "Lek uwalniający insulinę z trzustki w cukrzycy typu 2. Bezpieczniejszy w kontekście ryzyka niedocukrzenia niż starsze leki z tej grupy." },
+  { id: 42, name: "Glimepiryd", substance: "Glimepiridum", producer: "Sanofi", doses: [1, 2, 3, 4], unit: "mg", description: "Pochodna sulfonylomocznika. Zmusza trzustkę do zwiększonej produkcji insuliny." },
+  { id: 43, name: "Gliklazyd", substance: "Gliclazidum", producer: "Servier", doses: [30, 60], unit: "mg", description: "Lek uwalniający insulinę z trzustki w cukrzycy typu 2." },
   { id: 44, name: "Empagliflozyna", substance: "Empagliflozinum", producer: "Boehringer Ingelheim", doses: [10, 25], unit: "mg", description: "Flozyna. Powoduje wydalanie nadmiaru glukozy z moczem. Dodatkowo chroni serce i nerki." },
   { id: 45, name: "Dapagliflozyna", substance: "Dapagliflozinum", producer: "AstraZeneca", doses: [10], unit: "mg", description: "Nowoczesny lek przeciwcukrzycowy. Obniża poziom cukru we krwi poprzez zwiększenie jego wydalania przez nerki." },
   { id: 46, name: "Semaglutyd", substance: "Semaglutidum", producer: "Novo Nordisk", doses: [0.25, 0.5, 1], unit: "mg", description: "Analog GLP-1. Silnie obniża poziom cukru i znacząco hamuje apetyt, co prowadzi do spadku masy ciała." },
   { id: 47, name: "Insulina Glargine", substance: "Insulinum glargine", producer: "Sanofi", description: "Insulina długodziałająca (bazowa). Zapewnia stały poziom insuliny w tle przez około 24 godziny." },
-  { id: 48, name: "Insulina Lispro", substance: "Insulinum lispro", producer: "Eli Lilly", description: "Insulina szybkodziałająca. Podawana tuż przed posiłkiem, by zapobiec nagłym skokom cukru we krwi." },
-  { id: 49, name: "Euthyrox N", substance: "Levothyroxinum natricum", producer: "Merck", doses: [25, 50, 75, 88, 100, 112, 125, 150], unit: "µg", description: "Syntetyczny hormon tarczycy. Podstawowy lek w niedoczynności tarczycy i chorobie Hashimoto. Należy przyjmować na czczo." },
+  { id: 48, name: "Insulina Lispro", substance: "Insulinum lispro", producer: "Eli Lilly", description: "Insulina szybkodziałająca. Podawana tuż przed posiłkiem." },
+  { id: 49, name: "Euthyrox N", substance: "Levothyroxinum natricum", producer: "Merck", doses: [25, 50, 75, 88, 100, 112, 125, 150], unit: "µg", description: "Syntetyczny hormon tarczycy. Podstawowy lek w niedoczynności tarczycy i chorobie Hashimoto." },
   { id: 50, name: "Tiamazol", substance: "Thiamazolum", producer: "Hasco-Lek", description: "Lek przeciwtarczycowy. Hamuje produkcję hormonów tarczycy, stosowany w jej nadczynności." },
   { id: 51, name: "Sertralina", substance: "Sertralinum", producer: "Pfizer", doses: [50, 100], unit: "mg", description: "Lek antydepresyjny z grupy SSRI. Reguluje poziom serotoniny, skuteczny w depresji i zaburzeniach lękowych." },
-  { id: 52, name: "Escitalopram", substance: "Escitalopramum", producer: "Lundbeck", doses: [10, 20], unit: "mg", description: "Jeden z najnowocześniejszych i najczystszych leków z grupy SSRI. Dobrze tolerowany w leczeniu depresji." },
-  { id: 53, name: "Fluoksetyna", substance: "Fluoxetinum", producer: "Eli Lilly", doses: [20], unit: "mg", description: "Klasyczny antydepresant SSRI (oryginalny Prozac). Dodaje energii, łagodzi lęki i objawy bulimii." },
-  { id: 54, name: "Wenlafaksyna", substance: "Venlafaxinum", producer: "Pfizer", doses: [37.5, 75, 150], unit: "mg", description: "Lek z grupy SNRI. Działa na serotoninę i noradrenalinę. Bardzo skuteczny w cięższych, lekoopornych depresjach." },
-  { id: 55, name: "Duloksetyna", substance: "Duloxetinum", producer: "Eli Lilly", doses: [30, 60], unit: "mg", description: "Antydepresant SNRI. Poza leczeniem nastroju, bardzo skutecznie redukuje ból neuropatyczny i bóle mięśniowo-stawowe." },
-  { id: 56, name: "Mirtazapina", substance: "Mirtazapinum", producer: "Organon", doses: [15, 30], unit: "mg", description: "Lek przeciwdepresyjny o silnym działaniu nasennym i poprawiającym apetyt. Idealny dla osób z bezsennością." },
-  { id: 57, name: "Trazodon", substance: "Trazodonum", producer: "Angelini", doses: [75, 150], unit: "mg", description: "Lek antydepresyjny używany w małych dawkach głównie do poprawy jakości snu. Nie uzależnia tak jak tabletki nasenne." },
-  { id: 58, name: "Alprazolam", substance: "Alprazolamum", producer: "Pfizer", doses: [0.25, 0.5, 1], unit: "mg", description: "Silny lek przeciwlękowy i uspokajający (benzodiazepina). Działa błyskawicznie w atakach paniki. Silnie uzależnia." },
-  { id: 59, name: "Diazepam", substance: "Diazepamum", producer: "Polfa", doses: [2, 5], unit: "mg", description: "Długodziałający lek uspokajający, przeciwdrgawkowy i zwiotczający mięśnie. Wymaga ścisłej kontroli." },
-  { id: 60, name: "Klonazepam", substance: "Clonazepamum", producer: "Polfa", doses: [0.5, 2], unit: "mg", description: "Silna benzodiazepina o działaniu przeciwpadaczkowym i uspokajającym. Niesie duże ryzyko tolerancji." },
-  { id: 61, name: "Zolpidem", substance: "Zolpidemum", producer: "Sanofi", doses: [10], unit: "mg", description: "Szybki, krótkodziałający lek nasenny. Ułatwia zasypianie, ale może powodować objawy lunatykowania. Tylko do leczenia doraźnego." },
-  { id: 62, name: "Pregabalina", substance: "Pregabalinum", producer: "Pfizer", doses: [75, 150, 300], unit: "mg", description: "Początkowo lek przeciwpadaczkowy, obecnie złoty standard w leczeniu bólów neuropatycznych i stanów lękowych uogólnionych." },
-  { id: 63, name: "Gabapentyna", substance: "Gabapentinum", producer: "Pfizer", doses: [300, 400], unit: "mg", description: "Lek na padaczkę i ból neuropatyczny. Podobny w działaniu do pregabaliny, stosowany w uszkodzeniach nerwów." },
-  { id: 64, name: "Karbamazepina", substance: "Carbamazepinum", producer: "Novartis", doses: [200, 400], unit: "mg", description: "Stabilizator nastroju i lek przeciwpadaczkowy. Wyjątkowo skuteczny w nerwobólu nerwu trójdzielnego twarzy." },
-  { id: 65, name: "Kwas walproinowy", substance: "Acidum valproicum", producer: "Sanofi", description: "Lek przeciwpadaczkowy i stabilizator nastroju, używany również w zapobieganiu migrenom." },
-  { id: 66, name: "Lamotrygina", substance: "Lamotriginum", producer: "GSK", doses: [25, 50, 100], unit: "mg", description: "Bezpieczny lek przeciwpadaczkowy i stabilizujący nastrój (zwłaszcza w chorobie afektywnej dwubiegunowej)." },
-  { id: 67, name: "Haloperidol", substance: "Haloperidolum", producer: "Janssen", description: "Klasyczny silny lek neuroleptyczny stosowany w ostrej schizofrenii, halucynacjach i agresji psychotycznej." },
-  { id: 68, name: "Kwetiapina", substance: "Quetiapinum", producer: "AstraZeneca", doses: [25, 100, 200], unit: "mg", description: "Atypowy neuroleptyk. W małych dawkach działa uspokajająco i nasennie, w większych antypsychotycznie." },
-  { id: 69, name: "Olanzapina", substance: "Olanzapinum", producer: "Eli Lilly", doses: [5, 10], unit: "mg", description: "Skuteczny lek przeciwpsychotyczny, ale obciążony dużym ryzykiem znacznego przyrostu masy ciała." },
-  { id: 70, name: "Arypiprazol", substance: "Aripiprazolum", producer: "Otsuka", description: "Nowoczesny lek na schizofrenię i chorobę dwubiegunową. Działa aktywizująco, nie powoduje tycia i nie usypia pacjenta." },
-  { id: 71, name: "Cetyryzyna", substance: "Cetirizinum", producer: "UCB", doses: [10], unit: "mg", description: "Lek przeciwhistaminowy stosowany w alergii. U niektórych pacjentów może powodować lekką senność." },
-  { id: 72, name: "Loratadyna", substance: "Loratadinum", producer: "Bayer", doses: [10], unit: "mg", description: "Lek na alergię II generacji. Skutecznie hamuje katar sienny i pokrzywkę, zazwyczaj nie usypia." },
-  { id: 73, name: "Feksofenadyna", substance: "Fexofenadinum", producer: "Sanofi", doses: [120, 180], unit: "mg", description: "Bardzo bezpieczny lek przeciwalergiczny. Jako jeden z niewielu nie przenika do mózgu, przez co w ogóle nie powoduje senności." },
-  { id: 74, name: "Desloratadyna", substance: "Desloratadinum", producer: "Organon", doses: [5], unit: "mg", description: "Nowoczesny lek antyalergiczny, udoskonalona wersja loratadyny. Bezpieczny i długodziałający." },
-  { id: 75, name: "Hydroksyzyna", substance: "Hydroxyzinum", producer: "UCB", doses: [10, 25], unit: "mg", description: "Lek przeciwhistaminowy pierwszej generacji o bardzo silnym działaniu uspokajającym i przeciwświądowym. Nie uzależnia." },
-  { id: 76, name: "Salbutamol", substance: "Salbutamolum", producer: "GSK", description: "Szybki wziewny lek rozszerzający oskrzela. Przynosi natychmiastową ulgę w dusznościach i ataku astmy." },
-  { id: 77, name: "Formoterol", substance: "Formoterolum", producer: "AstraZeneca", description: "Długodziałający lek wziewny (LABA). Rozszerza oskrzela na 12 godzin, zapobiegając atakom astmy." },
-  { id: 78, name: "Budezonid", substance: "Budesonidum", producer: "AstraZeneca", description: "Wziewny steryd stosowany profilaktycznie w astmie. Leczy stan zapalny oskrzeli i zmniejsza reaktywność dróg oddechowych." },
+  { id: 52, name: "Escitalopram", substance: "Escitalopramum", producer: "Lundbeck", doses: [10, 20], unit: "mg", description: "Jeden z najnowocześniejszych leków z grupy SSRI. Dobrze tolerowany w leczeniu depresji." },
+  { id: 53, name: "Fluoksetyna", substance: "Fluoxetinum", producer: "Eli Lilly", doses: [20], unit: "mg", description: "Klasyczny antydepresant SSRI. Dodaje energii, łagodzi lęki." },
+  { id: 54, name: "Wenlafaksyna", substance: "Venlafaxinum", producer: "Pfizer", doses: [37.5, 75, 150], unit: "mg", description: "Lek z grupy SNRI. Bardzo skuteczny w cięższych, lekoopornych depresjach." },
+  { id: 55, name: "Duloksetyna", substance: "Duloxetinum", producer: "Eli Lilly", doses: [30, 60], unit: "mg", description: "Antydepresant SNRI. Poza leczeniem nastroju, bardzo skutecznie redukuje ból neuropatyczny." },
+  { id: 56, name: "Mirtazapina", substance: "Mirtazapinum", producer: "Organon", doses: [15, 30], unit: "mg", description: "Lek przeciwdepresyjny o silnym działaniu nasennym i poprawiającym apetyt." },
+  { id: 57, name: "Trazodon", substance: "Trazodonum", producer: "Angelini", doses: [75, 150], unit: "mg", description: "Lek antydepresyjny używany w małych dawkach głównie do poprawy jakości snu." },
+  { id: 58, name: "Alprazolam", substance: "Alprazolamum", producer: "Pfizer", doses: [0.25, 0.5, 1], unit: "mg", description: "Silny lek przeciwlękowy i uspokajający (benzodiazepina)." },
+  { id: 59, name: "Diazepam", substance: "Diazepamum", producer: "Polfa", doses: [2, 5], unit: "mg", description: "Długodziałający lek uspokajający, przeciwdrgawkowy i zwiotczający mięśnie." },
+  { id: 60, name: "Klonazepam", substance: "Clonazepamum", producer: "Polfa", doses: [0.5, 2], unit: "mg", description: "Silna benzodiazepina o działaniu przeciwpadaczkowym i uspokajającym." },
+  { id: 61, name: "Zolpidem", substance: "Zolpidemum", producer: "Sanofi", doses: [10], unit: "mg", description: "Szybki, krótkodziałający lek nasenny." },
+  { id: 62, name: "Pregabalina", substance: "Pregabalinum", producer: "Pfizer", doses: [75, 150, 300], unit: "mg", description: "Początkowo lek przeciwpadaczkowy, obecnie standard w leczeniu bólów neuropatycznych i stanów lękowych." },
+  { id: 63, name: "Gabapentyna", substance: "Gabapentinum", producer: "Pfizer", doses: [300, 400], unit: "mg", description: "Lek na padaczkę i ból neuropatyczny." },
+  { id: 64, name: "Karbamazepina", substance: "Carbamazepinum", producer: "Novartis", doses: [200, 400], unit: "mg", description: "Stabilizator nastroju i lek przeciwpadaczkowy." },
+  { id: 65, name: "Kwas walproinowy", substance: "Acidum valproicum", producer: "Sanofi", description: "Lek przeciwpadaczkowy i stabilizator nastroju." },
+  { id: 66, name: "Lamotrygina", substance: "Lamotriginum", producer: "GSK", doses: [25, 50, 100], unit: "mg", description: "Bezpieczny lek przeciwpadaczkowy i stabilizujący nastrój." },
+  { id: 67, name: "Haloperidol", substance: "Haloperidolum", producer: "Janssen", description: "Klasyczny silny lek neuroleptyczny stosowany w ostrej schizofrenii." },
+  { id: 68, name: "Kwetiapina", substance: "Quetiapinum", producer: "AstraZeneca", doses: [25, 100, 200], unit: "mg", description: "Atypowy neuroleptyk. W małych dawkach działa uspokajająco i nasennie." },
+  { id: 69, name: "Olanzapina", substance: "Olanzapinum", producer: "Eli Lilly", doses: [5, 10], unit: "mg", description: "Skuteczny lek przeciwpsychotyczny." },
+  { id: 70, name: "Arypiprazol", substance: "Aripiprazolum", producer: "Otsuka", description: "Nowoczesny lek na schizofrenię i chorobę dwubiegunową." },
+  { id: 71, name: "Cetyryzyna", substance: "Cetirizinum", producer: "UCB", doses: [10], unit: "mg", description: "Lek przeciwhistaminowy stosowany w alergii." },
+  { id: 72, name: "Loratadyna", substance: "Loratadinum", producer: "Bayer", doses: [10], unit: "mg", description: "Lek na alergię II generacji. Skutecznie hamuje katar sienny." },
+  { id: 73, name: "Feksofenadyna", substance: "Fexofenadinum", producer: "Sanofi", doses: [120, 180], unit: "mg", description: "Bardzo bezpieczny lek przeciwalergiczny. Nie powoduje senności." },
+  { id: 74, name: "Desloratadyna", substance: "Desloratadinum", producer: "Organon", doses: [5], unit: "mg", description: "Nowoczesny lek antyalergiczny. Bezpieczny i długodziałający." },
+  { id: 75, name: "Hydroksyzyna", substance: "Hydroxyzinum", producer: "UCB", doses: [10, 25], unit: "mg", description: "Lek przeciwhistaminowy o bardzo silnym działaniu uspokajającym i przeciwświądowym." },
+  { id: 76, name: "Salbutamol", substance: "Salbutamolum", producer: "GSK", description: "Szybki wziewny lek rozszerzający oskrzela. Przynosi natychmiastową ulgę w dusznościach." },
+  { id: 77, name: "Formoterol", substance: "Formoterolum", producer: "AstraZeneca", description: "Długodziałający lek wziewny (LABA). Rozszerza oskrzela na 12 godzin." },
+  { id: 78, name: "Budezonid", substance: "Budesonidum", producer: "AstraZeneca", description: "Wziewny steryd stosowany profilaktycznie w astmie." },
   { id: 79, name: "Flutykazon", substance: "Fluticasonum", producer: "GSK", description: "Silny steryd miejscowy, stosowany wziewnie w astmie lub do nosa na oporne alergie." },
-  { id: 80, name: "Montelukast", substance: "Montelukastum", producer: "Merck", doses: [10], unit: "mg", description: "Lek doustny na astmę. Zmniejsza stan zapalny i obrzęk dróg oddechowych poprzez hamowanie leukotrienów." },
-  { id: 81, name: "Warfaryna", substance: "Warfarinum", producer: "Orion", description: "Lek przeciwzakrzepowy (antagonista witaminy K). Wymaga regularnego, ścisłego pomiaru parametru krzepnięcia INR." },
-  { id: 82, name: "Acenokumarol", substance: "Acenocoumarolum", producer: "Novartis", description: "Starszy lek przeciwzakrzepowy, działa krócej niż warfaryna. Wchodzi w groźne interakcje z dietą (zielone warzywa)." },
-  { id: 83, name: "Rywaroksaban", substance: "Rivaroxabanum", producer: "Bayer", doses: [10, 15, 20], unit: "mg", description: "Nowoczesny, bezpieczny lek rozrzedzający krew (NOAC). Nie wymaga badań INR, chroni przed udarem przy migotaniu przedsionków." },
-  { id: 84, name: "Apiksaban", substance: "Apixabanum", producer: "Pfizer", doses: [2.5, 5], unit: "mg", description: "Lek przeciwzakrzepowy nowej generacji. Posiada profil największego bezpieczeństwa pod kątem ryzyka krwawień żołądkowych." },
+  { id: 80, name: "Montelukast", substance: "Montelukastum", producer: "Merck", doses: [10], unit: "mg", description: "Lek doustny na astmę. Zmniejsza stan zapalny i obrzęk dróg oddechowych." },
+  { id: 81, name: "Warfaryna", substance: "Warfarinum", producer: "Orion", description: "Lek przeciwzakrzepowy. Wymaga regularnego pomiaru INR." },
+  { id: 82, name: "Acenokumarol", substance: "Acenocoumarolum", producer: "Novartis", description: "Starszy lek przeciwzakrzepowy, działa krócej niż warfaryna." },
+  { id: 83, name: "Rywaroksaban", substance: "Rivaroxabanum", producer: "Bayer", doses: [10, 15, 20], unit: "mg", description: "Nowoczesny, bezpieczny lek rozrzedzający krew (NOAC)." },
+  { id: 84, name: "Apiksaban", substance: "Apixabanum", producer: "Pfizer", doses: [2.5, 5], unit: "mg", description: "Lek przeciwzakrzepowy nowej generacji. Posiada profil największego bezpieczeństwa pod kątem krwawień żołądkowych." },
   { id: 85, name: "Klopidogrel", substance: "Clopidogrelum", producer: "Sanofi", doses: [75], unit: "mg", description: "Lek przeciwpłytkowy stosowany w zapobieganiu zakrzepom u pacjentów po stencie i zawale serca." },
-  { id: 86, name: "Acard", substance: "Acidum acetylsalicylicum", producer: "Polfa", doses: [75, 150], unit: "mg", description: "Niska dawka kwasu używana kardiologicznie do hamowania zlepiania się płytek krwi. Profilaktyka zawałów i udarów." },
-  { id: 87, name: "Heparyna", substance: "Heparinum", producer: "WZF Polfa", description: "Lek przeciwzakrzepowy do podawania podskórnego, działający natychmiastowo po iniekcji." },
-  { id: 88, name: "Enoksaparyna", substance: "Enoxaparinum", producer: "Sanofi", description: "Heparyna drobnocząsteczkowa stosowana w zastrzykach podskórnych zapobiegająco przed zakrzepicą (np. przed lotem lub po operacji)." },
-  { id: 89, name: "Sildenafil", substance: "Sildenafilum", producer: "Pfizer", doses: [25, 50, 100], unit: "mg", description: "Słynna niebieska tabletka. Silnie rozszerza naczynia krwionośne prącia ułatwiając erekcję. Nie łączyć z nitratami!" },
-  { id: 90, name: "Tadalafil", substance: "Tadalafilum", producer: "Eli Lilly", doses: [5, 10, 20], unit: "mg", description: "Lek na potencję o bardzo długim czasie działania (działająca do 36 godzin)." },
-  { id: 91, name: "Tamsulozyna", substance: "Tamsulosinum", producer: "Astellas", doses: [0.4], unit: "mg", description: "Rozluźnia mięśnie prostaty i pęcherza. Ułatwia bezbolesne oddawanie moczu u mężczyzn z przerostem stercza." },
-  { id: 92, name: "Finasteryd", substance: "Finasteridum", producer: "Organon", doses: [1, 5], unit: "mg", description: "Lek zmniejszający masę przerośniętej prostaty. W mniejszych dawkach skutecznie hamuje męskie łysienie androgenowe." },
-  { id: 93, name: "Doksazosyna", substance: "Doxazosinum", producer: "Pfizer", doses: [2, 4], unit: "mg", description: "Stosowany przy przeroście prostaty i nadciśnieniu. Rozszerza naczynia, ułatwiając oddawanie moczu i obniżając ciśnienie." },
-  { id: 94, name: "Allopurynol", substance: "Allopurinolum", producer: "GSK", doses: [100, 300], unit: "mg", description: "Zmniejsza produkcję kwasu moczowego w organizmie. To podstawowy lek zapobiegający nawrotom bolesnych ataków dny moczanowej." },
-  { id: 95, name: "Febuksostat", substance: "Febuxostatum", producer: "Menarini", doses: [80, 120], unit: "mg", description: "Nowsza alternatywa dla allopurynolu na dnę moczanową. Silniejszy i często stosowany u osób z niewydolnością nerek." },
-  { id: 96, name: "Metotreksat", substance: "Methotrexatum", producer: "Ebewe", description: "Silny lek immunosupresyjny. W małych dawkach podawany raz w tygodniu stanowi trzon leczenia reumatoidalnego zapalenia stawów." },
-  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Ważna witamina z grupy B. Kluczowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
-  { id: 98, name: "Karbimazol", substance: "Carbimazolum", producer: "Amdipharm", description: "Lek stosowany w nadczynności tarczycy, obniżający nadprodukcję hormonów tarczycowych." },
-  { id: 99, name: "Doksepina", substance: "Doxepinum", producer: "Teva", doses: [10, 25], unit: "mg", description: "Klasyczny, starszy lek antydepresyjny (TLPD). Ze względu na skutki uboczne obecnie stosowany w małych dawkach nasennie i przeciwbólowo." },
-  { id: 100, name: "Amiodaron", substance: "Amiodaronum", producer: "Sanofi", doses: [200], unit: "mg", description: "Jeden z najskuteczniejszych leków antyarytmicznych. Ratuje życie w migotaniu, ale zawiera jod, przez co niszczy lub nadpobudza tarczycę." },
+  { id: 86, name: "Acard", substance: "Acidum acetylsalicylicum", producer: "Polfa", doses: [75, 150], unit: "mg", description: "Niska dawka kwasu używana kardiologicznie do hamowania zlepiania się płytek krwi." },
+  { id: 87, name: "Heparyna", substance: "Heparinum", producer: "WZF Polfa", description: "Lek przeciwzakrzepowy do podawania podskórnego." },
+  { id: 88, name: "Enoksaparyna", substance: "Enoxaparinum", producer: "Sanofi", description: "Heparyna drobnocząsteczkowa stosowana w zastrzykach podskórnych zapobiegająco przed zakrzepicą." },
+  { id: 89, name: "Sildenafil", substance: "Sildenafilum", producer: "Pfizer", doses: [25, 50, 100], unit: "mg", description: "Silnie rozszerza naczynia krwionośne prącia ułatwiając erekcję. Nie łączyć z nitratami!" },
+  { id: 90, name: "Tadalafil", substance: "Tadalafilum", producer: "Eli Lilly", doses: [5, 10, 20], unit: "mg", description: "Lek na potencję o bardzo długim czasie działania." },
+  { id: 91, name: "Tamsulozyna", substance: "Tamsulosinum", producer: "Astellas", doses: [0.4], unit: "mg", description: "Rozluźnia mięśnie prostaty i pęcherza." },
+  { id: 92, name: "Finasteryd", substance: "Finasteridum", producer: "Organon", doses: [1, 5], unit: "mg", description: "Lek zmniejszający masę przerośniętej prostaty." },
+  { id: 93, name: "Doksazosyna", substance: "Doxazosinum", producer: "Pfizer", doses: [2, 4], unit: "mg", description: "Stosowany przy przeroście prostaty i nadciśnieniu." },
+  { id: 94, name: "Allopurynol", substance: "Allopurinolum", producer: "GSK", doses: [100, 300], unit: "mg", description: "Zmniejsza produkcję kwasu moczowego w organizmie. Podstawowy lek zapobiegający nawrotom ataków dny moczanowej." },
+  { id: 95, name: "Febuksostat", substance: "Febuxostatum", producer: "Menarini", doses: [80, 120], unit: "mg", description: "Nowsza alternatywa dla allopurynolu na dnę moczanową." },
+  { id: 96, name: "Metotreksat", substance: "Methotrexatum", producer: "Ebewe", description: "Silny lek immunosupresyjny stosowany m.in. w RZS." },
+  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Kluzowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
+  { id: 98, name: "Karbimazol", substance: "Carbimazolum", producer: "Amdipharm", description: "Lek stosowany w nadczynności tarczycy." },
+  { id: 99, name: "Doksepina", substance: "Doxepinum", producer: "Teva", doses: [10, 25], unit: "mg", description: "Klasyczny, starszy lek antydepresyjny (TLPD)." },
+  { id: 100, name: "Amiodaron", substance: "Amiodaronum", producer: "Sanofi", doses: [200], unit: "mg", description: "Jeden z najskuteczniejszych leków antyarytmicznych." },
   { id: 101, name: "Thiocodin", substance: "Codeini phosphas, Sulfogaiacolum", producer: "Unia", doses: [15], unit: "mg", description: "Lek przeciwkaszlowy z kodeiną. Hamuje odruch kaszlu. Posiada potencjał uzależniający." },
   { id: 102, name: "Solpadeine", substance: "Paracetamolum, Codeinum, Coffeinum", producer: "Perrigo", doses: [500], unit: "mg", description: "Lek przeciwbólowy z kodeiną i kofeiną. Stosowany w leczeniu krótkotrwałego, ostrego bólu. Ostrożnie przy regularnym stosowaniu." },
   { id: 103, name: "Octeangin", substance: "Octenidini dihydrochloridum", producer: "Klosterfrau", doses: [2.6], unit: "mg", description: "Pastylki twarde. Antyseptyk stosowany w zakażeniach śluzówki jamy ustnej i gardła." },
@@ -115,23 +115,54 @@ const baseDrugs = [
   { id: 111, name: "Nifuroksazyd", substance: "Nifuroxazidum", producer: "Gedeon Richter", doses: [100, 200], unit: "mg", description: "Lek przeciwbakteryjny stosowany w ostrych, zakaźnych biegunkach. Nie wchłania się z przewodu pokarmowego." }
 ]
 
-const generateRemaining = () => {
+const extraDrugsData = [
+  "Nimesil", "Skudexa", "Doreta", "Polocard", "Prestarium", "Nebilet", "Concor", "Betaloc", "Captopril", "Enalapril",
+  "Amlopin", "Amlozek", "Normodipine", "Tenox", "Apo-Amlo", "Agen", "Aldactone", "Spironol", "Verospiron", "Finlepsin",
+  "Neurotop", "Tegretol", "Amoksiklav", "Augmentin", "Taromentin", "Forcid", "Ramoclav", "Zinnat", "Bioracef", "Zamur",
+  "Tarfazolin", "Biofuroksym", "Cefox", "Cefuroximum", "Emanera", "Nolpaza", "Controloc", "Dexilant", "Zulbex", "Mesopral",
+  "Polprazol", "Bioprazol", "Ortanol", "Gasec", "Helicid", "Ultop", "Prazol", "Zolpic", "Nasen", "Onirex",
+  "Polsen", "Apo-Zolpin", "Stilnox", "Xanax", "Afobam", "Zomiren", "Neurol", "Alprox", "Relanium", "Neorelium",
+  "Relsed", "Estazolam", "Signopam", "Lorafen", "Cloranxen", "Tranxene", "Zoloft", "Asertin", "Setaloft", "Stimuloton",
+  "Miraval", "Apo-Serta", "Zotral", "Depralin", "Escitil", "Mozarin", "Aciprex", "Elicea", "Nexpram", "Symescital",
+  "Seronil", "Bioxetin", "Andepin", "Salipax", "Efectin", "Alventa", "Velaxin", "Venlectine", "Oriven", "Faxolet",
+  "Cymbalta", "Dulsevia", "Depratal", "Duloxetin", "Remirta", "Mirzaten", "Mirtor", "Trittico", "Ketrel", "Kwetaplex",
+  "Pinexet", "Ketiap", "Apo-Quetiapin", "Zolafren", "Olzapin", "Ranofren", "Anzapin", "Abilify", "Aribit", "Apiprazol",
+  "Aryzalera", "Clatra", "Rupafin", "Jovesto", "Xyzal", "Zafiron", "Zyrtec", "Allertec", "Hitaxa", "Telfexo",
+  "Allegra", "Aerius", "Dasselta", "Symla", "Atarax", "Ventolin", "Serevent", "Symbicort", "Berodual", "Milurit",
+  "Xigduo", "Jardiance", "Forxiga", "Trulicity", "Ozempic", "Rybelsus", "Glucophage", "Siofor", "Formetic", "Avamina",
+  "Metformax", "Glucotrol", "Diaprel", "Gliclada", "Sugen", "Amaryl", "Glibetic", "Sodanton", "Insulatard", "Actrapid",
+  "NovoRapid", "Lantus", "Toujeo", "Abasaglar", "Humalog", "Apidra", "Ryzodeg", "Tresiba", "Levemir", "Letrox",
+  "Novothyral", "Thyrozol", "Lipanthyl", "Suvardio", "Zahron", "Romazic", "Roswera", "Crestor", "Vasilip", "Simvacard",
+  "Zocor", "Polfilin", "Agapurin", "Trental", "Cavinton", "Vicebrol", "Lucetam", "Nootropil", "Memotropil", "Biomentin",
+  "Axura", "Yasmin", "Microgynon", "Marvelon", "Cilest", "Diane-35", "Jeanine", "Novynette", "Regulon", "Sylvie",
+  "Vines", "Orlifique", "Atywia", "Belara", "Madinette", "NuvaRing", "Evra", "Depo-Provera", "Mirena", "Jaydess",
+  "Duphaston", "Luteina", "Euthyrox", "Vigantol", "Devikap", "Sorbifer", "Tardyferon", "Magne B6", "Asmag", "Chela-Mag",
+  "Aspargin", "Kalipoz", "Kaldyum", "Zolmiles", "Cinie", "Sumamigren", "Imigran", "Maxalt", "Relpax", "Migea",
+  "Divascan", "Flunarizinum", "Cinnarizinum", "Captopril", "Polpril", "Tritace", "Axtil", "Vivace", "Ampril", "Piramil",
+  "Lorista", "Xartan", "Lakea", "Cozaar", "Valsacor", "Diovan", "Avasart", "Micardis", "Pritor", "Kinzal",
+  "Diuresin", "Tertensif", "Indapen", "Rawel", "Hyzaar", "Co-Prestarium", "Noliprel", "Tarka", "Ginkofar", "Bilobil"
+]
+
+const generateNFZ = () => {
   const arr = []
-  for (let i = 112; i <= 347; i++) {
+  let idCounter = 112
+  for (let i = 0; i < extraDrugsData.length; i++) {
+    if (idCounter > 347) break;
     arr.push({
-      id: i,
-      name: `Preparat Medyczny #${i}`,
-      substance: `Substantia generalis ${i}`,
-      producer: "BioPharma Group",
+      id: idCounter,
+      name: extraDrugsData[i],
+      substance: "Substancja lecznicza",
+      producer: "Producent Farmaceutyczny",
       doses: [10, 20, 50],
       unit: "mg",
-      description: "Preparat uzupełniający bazę medyczną o ogólnym przeznaczeniu terapeutycznym."
+      description: "Preparat dostępny w aptekach. Stosować zgodnie z ulotką lub zaleceniami lekarza."
     })
+    idCounter++
   }
   return arr
 }
 
-const fullLocalDrugsDb = [...baseDrugs, ...generateRemaining()]
+const fullLocalDrugsDb = [...localDrugsDb, ...generateNFZ()]
 const sortedLocalDrugsDb = [...fullLocalDrugsDb].sort((a, b) => a.name.localeCompare(b.name))
 
 const interactionsDb = [
@@ -151,11 +182,7 @@ function App() {
     if (saved) {
       return JSON.parse(saved)
     }
-    return [
-      { id: 86, name: 'Acard', dose: '75', unit: 'mg', totalPills: 30, packageSize: 30, pillsPerDay: 1, startDate: '2026-09-10', isFavorite: true },
-      { id: 25, name: 'Ramipryl', dose: '5', unit: 'mg', totalPills: 28, packageSize: 28, pillsPerDay: 2, startDate: '2026-09-20', isFavorite: false },
-      { id: 2, name: 'Ibuprofen', dose: '400', unit: 'mg', totalPills: 60, packageSize: 60, pillsPerDay: 1, startDate: '2026-10-01', isFavorite: false }
-    ]
+    return []
   })
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -188,10 +215,8 @@ function App() {
   const [editingId, setEditingId] = useState(null)
   
   const [suggestedDoses, setSuggestedDoses] = useState([])
-
   const [expandedCards, setExpandedCards] = useState({})
   const [expandedDbCards, setExpandedDbCards] = useState({})
-
   const [solpadeineClicks, setSolpadeineClicks] = useState([])
 
   useEffect(() => {
@@ -483,101 +508,111 @@ function App() {
               </button>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              <AnimatePresence>
-                {sortedMeds.map(med => {
-                  const { dni, zapas } = getMedStats(med)
-                  const dataKonca = new Date(Date.now() + dni * 24 * 60 * 60 * 1000).toLocaleDateString('pl-PL')
-                  const isExpanded = expandedCards[med.id]
-                  
-                  let kolor = isDarkMode ? "bg-[#20602C]/20 border-[#20602C] text-gray-300" : "bg-green-100 border-[#20602C] text-gray-900"
-                  let alert = "Zapas jest wystarczający"
-                  let btnAkcja = "bg-[#20602C] hover:bg-[#184821] text-white"
-                  
-                  if (dni < 3) {
-                    kolor = isDarkMode ? "bg-red-900/20 border-red-600 text-red-400" : "bg-red-100 border-red-500 text-red-900"
-                    alert = "Krytycznie mało! Zamów receptę."
-                    btnAkcja = isDarkMode ? "bg-red-600 hover:bg-red-500 text-white" : "bg-red-600 hover:bg-red-700 text-white"
-                  } else if (dni <= 7) {
-                    kolor = isDarkMode ? "bg-amber-900/20 border-amber-600 text-amber-400" : "bg-amber-100 border-amber-500 text-amber-900"
-                    alert = "Końcówka, pomyśl o recepcie."
-                    btnAkcja = isDarkMode ? "bg-amber-600 hover:bg-amber-500 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"
-                  }
+            {meds.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <p className="text-lg font-bold">Twoja apteczka jest pusta</p>
+                <p className="text-sm mt-1">Kliknij plusik w rogu, aby dodać swój pierwszy lek.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <AnimatePresence>
+                  {sortedMeds.map(med => {
+                    const { dni, zapas } = getMedStats(med)
+                    const dataKonca = new Date(Date.now() + dni * 24 * 60 * 60 * 1000).toLocaleDateString('pl-PL')
+                    const isExpanded = expandedCards[med.id]
+                    
+                    let kolor = isDarkMode ? "bg-[#20602C]/20 border-[#20602C] text-gray-300" : "bg-green-100 border-[#20602C] text-gray-900"
+                    let alert = "Zapas jest wystarczający"
+                    let btnAkcja = "bg-[#20602C] hover:bg-[#184821] text-white"
+                    
+                    if (dni < 3) {
+                      kolor = isDarkMode ? "bg-red-900/20 border-red-600 text-red-400" : "bg-red-100 border-red-500 text-red-900"
+                      alert = "Krytycznie mało! Zamów receptę."
+                      btnAkcja = isDarkMode ? "bg-red-600 hover:bg-red-500 text-white" : "bg-red-600 hover:bg-red-700 text-white"
+                    } else if (dni <= 7) {
+                      kolor = isDarkMode ? "bg-amber-900/20 border-amber-600 text-amber-400" : "bg-amber-100 border-amber-500 text-amber-900"
+                      alert = "Końcówka, pomyśl o recepcie."
+                      btnAkcja = isDarkMode ? "bg-amber-600 hover:bg-amber-500 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"
+                    }
 
-                  return (
-                    <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ type: "spring", stiffness: 350, damping: 25 }} key={med.id} className={`p-5 rounded-xl border-l-8 shadow-sm relative flex flex-col transition-colors duration-500 ${kolor}`}>
-                      <div className="absolute top-3 left-4 flex items-center gap-3">
-                        <button onClick={() => toggleFavorite(med.id)} className="active:scale-90 transition-transform focus:outline-none">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={`w-6 h-6 stroke-current drop-shadow-sm transition-colors duration-200 ${med.isFavorite ? 'fill-yellow-400 stroke-yellow-500' : 'fill-transparent opacity-50 hover:opacity-100'}`} strokeWidth="1.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                          </svg>
-                        </button>
-                        <button onClick={() => handleEdit(med)} className="text-xs md:text-sm font-bold uppercase tracking-wider opacity-60 hover:opacity-100 transition-opacity">Edytuj</button>
-                      </div>
-                      
-                      <button onClick={() => handleDelete(med.id)} className="absolute top-2 right-4 text-2xl font-bold opacity-50 hover:opacity-100 transition-opacity leading-none">×</button>
-                      
-                      <div className="flex justify-between items-end pr-2 mt-8 md:mt-10 gap-2 flex-grow">
-                        <h2 className="text-xl md:text-2xl font-bold leading-tight mb-1">
-                          {med.name} {med.dose && <span className="opacity-80 font-semibold">{med.dose}{med.unit}</span>}
-                        </h2>
-                        
-                        <div className="text-right min-w-[3.5rem]">
-                          <span className="text-4xl md:text-5xl font-black block leading-none">{dni}</span>
-                          <span className="text-xs md:text-sm uppercase font-bold opacity-80 mt-1 block">Dni</span>
-                        </div>
-                      </div>
-                      
-                      <p className="mt-3 text-sm md:text-base font-bold opacity-90">{alert}</p>
-                      
-                      <div className="mt-3 pt-3 border-t border-current/20 flex justify-between items-center text-sm md:text-base font-semibold opacity-80">
-                        <span>Wystarczy do:</span>
-                        <div className="flex items-center gap-2">
-                          <span>{dataKonca}</span>
-                          <button onClick={() => addToGoogleCalendar(med.name, dataKonca)} title="Przypomnij w Google Calendar" className={`p-1.5 rounded-lg transition-all active:scale-95 ${isDarkMode ? 'bg-[#1c2733] hover:bg-gray-700 text-blue-400' : 'bg-white hover:bg-gray-100 text-blue-600 shadow-sm'}`}>
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    return (
+                      <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ type: "spring", stiffness: 350, damping: 25 }} key={med.id} className={`p-5 rounded-xl border-l-8 shadow-sm relative flex flex-col transition-colors duration-500 ${kolor}`}>
+                        <div className="absolute top-3 left-4 flex items-center gap-3">
+                          <button onClick={() => toggleFavorite(med.id)} className="active:scale-90 transition-transform focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={`w-6 h-6 stroke-current drop-shadow-sm transition-colors duration-200 ${med.isFavorite ? 'fill-yellow-400 stroke-yellow-500' : 'fill-transparent opacity-50 hover:opacity-100'}`} strokeWidth="1.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                             </svg>
                           </button>
+                          <button onClick={() => handleEdit(med)} className="text-xs md:text-sm font-bold uppercase tracking-wider opacity-60 hover:opacity-100 transition-opacity">Edytuj</button>
                         </div>
-                      </div>
+                        
+                        <button onClick={() => handleDelete(med.id)} className="absolute top-2 right-4 text-2xl font-bold opacity-50 hover:opacity-100 transition-opacity leading-none">×</button>
+                        
+                        <div className="flex justify-between items-end pr-2 mt-8 md:mt-10 gap-2 flex-grow">
+                          <h2 className="text-xl md:text-2xl font-bold leading-tight mb-1">
+                            {med.name} {med.dose && <span className="opacity-80 font-semibold">{med.dose}{med.unit}</span>}
+                          </h2>
+                          
+                          <div className="text-right min-w-[3.5rem]">
+                            <span className="text-4xl md:text-5xl font-black block leading-none">{dni}</span>
+                            <span className="text-xs md:text-sm uppercase font-bold opacity-80 mt-1 block">Dni</span>
+                          </div>
+                        </div>
+                        
+                        <p className="mt-3 text-sm md:text-base font-bold opacity-90">{alert}</p>
+                        
+                        <div className="mt-3 pt-3 border-t border-current/20 flex justify-between items-center text-sm md:text-base font-semibold opacity-80">
+                          <span>Wystarczy do:</span>
+                          <div className="flex items-center gap-2">
+                            <span>{dataKonca}</span>
+                            <button onClick={() => addToGoogleCalendar(med.name, dataKonca)} title="Przypomnij w Google Calendar" className={`p-1.5 rounded-lg transition-all active:scale-95 ${isDarkMode ? 'bg-[#1c2733] hover:bg-gray-700 text-blue-400' : 'bg-white hover:bg-gray-100 text-blue-600 shadow-sm'}`}>
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
 
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                            <div className="mt-3 pt-3 border-t border-current/20 flex flex-col gap-3 text-sm md:text-base">
-                              <div className="flex justify-between items-center mb-1">
-                                <div><span className="block text-xs uppercase font-bold opacity-70">W zapasie</span><span className="font-bold">{zapas} szt.</span></div>
-                                <div className="text-right"><span className="block text-xs uppercase font-bold opacity-70">Dawkowanie</span><span className="font-bold">{med.pillsPerDay} / dobę</span></div>
-                              </div>
-                              
-                              <div className="flex gap-2">
-                                <button onClick={() => handleTakePill(med.id)} className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm shadow-sm active:scale-95 transition-all text-center border ${isDarkMode ? 'bg-[#1c2733]/80 hover:bg-[#1c2733] border-current/20 text-current' : 'bg-white/70 hover:bg-white text-gray-900 border-gray-300/50'}`}>
-                                  Wzięta dawka
-                                </button>
-                                <button onClick={() => handleAddPackage(med.id)} className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm shadow-sm active:scale-95 transition-all text-center ${btnAkcja}`}>
-                                  Nowe opakowanie
-                                </button>
-                              </div>
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                              <div className="mt-3 pt-3 border-t border-current/20 flex flex-col gap-3 text-sm md:text-base">
+                                <div className="flex justify-between items-center mb-1">
+                                  <div><span className="block text-xs uppercase font-bold opacity-70">W zapasie</span><span className="font-bold">{zapas} szt.</span></div>
+                                  <div className="text-right"><span className="block text-xs uppercase font-bold opacity-70">Dawkowanie</span><span className="font-bold">{med.pillsPerDay} / dobę</span></div>
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                  <button onClick={() => handleTakePill(med.id)} className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm shadow-sm active:scale-95 transition-all text-center border ${isDarkMode ? 'bg-[#1c2733]/80 hover:bg-[#1c2733] border-current/20 text-current' : 'bg-white/70 hover:bg-white text-gray-900 border-gray-300/50'}`}>
+                                    Wzięta dawka
+                                  </button>
+                                  <button onClick={() => handleAddPackage(med.id)} className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm shadow-sm active:scale-95 transition-all text-center ${btnAkcja}`}>
+                                    Nowe opakowanie
+                                  </button>
+                                </div>
 
-                              {dni <= 7 && (
-                                <button onClick={() => sendEmailToClinic(med.name, med.packageSize)} className={`w-full py-2.5 md:py-3 mt-1 rounded-xl font-bold text-xs md:text-sm shadow-sm active:scale-95 transition-all text-center border ${isDarkMode ? 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/50 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-900'}`}>
-                                  Napisz email do przychodni
-                                </button>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                      
-                      <button onClick={() => toggleCard(med.id)} className="w-full mt-3 pt-2 text-xs md:text-sm font-bold uppercase tracking-wider opacity-60 hover:opacity-100 text-center">
-                        {isExpanded ? "Zwiń szczegóły" : "Rozwiń szczegóły"}
-                      </button>
-                    </motion.div>
-                  )
-                })}
-              </AnimatePresence>
-            </div>
+                                {dni <= 7 && (
+                                  <button onClick={() => sendEmailToClinic(med.name, med.packageSize)} className={`w-full py-2.5 md:py-3 mt-1 rounded-xl font-bold text-xs md:text-sm shadow-sm active:scale-95 transition-all text-center border ${isDarkMode ? 'bg-amber-600/20 hover:bg-amber-600/30 border-amber-500/50 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-900'}`}>
+                                    Napisz email do przychodni
+                                  </button>
+                                )}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        
+                        <button onClick={() => toggleCard(med.id)} className="w-full mt-3 pt-2 text-xs md:text-sm font-bold uppercase tracking-wider opacity-60 hover:opacity-100 text-center">
+                          {isExpanded ? "Zwiń szczegóły" : "Rozwiń szczegóły"}
+                        </button>
+                      </motion.div>
+                    )
+                  })}
+                </AnimatePresence>
+              </div>
+            )}
           </motion.div>
         )}
 
