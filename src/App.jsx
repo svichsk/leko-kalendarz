@@ -98,7 +98,7 @@ const localDrugsDb = [
   { id: 94, name: "Allopurynol", substance: "Allopurinolum", producer: "GSK", doses: [100, 300], unit: "mg", description: "Zmniejsza produkcję kwasu moczowego w organizmie. Podstawowy lek zapobiegający nawrotom ataków dny moczanowej." },
   { id: 95, name: "Febuksostat", substance: "Febuxostatum", producer: "Menarini", doses: [80, 120], unit: "mg", description: "Nowsza alternatywa dla allopurynolu na dnę moczanową." },
   { id: 96, name: "Metotreksat", substance: "Methotrexatum", producer: "Ebewe", description: "Silny lek immunosupresyjny stosowany m.in. w RZS." },
-  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Kluczowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
+  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Kluzowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
   { id: 98, name: "Karbimazol", substance: "Carbimazolum", producer: "Amdipharm", description: "Lek stosowany w nadczynności tarczycy." },
   { id: 99, name: "Doksepina", substance: "Doxepinum", producer: "Teva", doses: [10, 25], unit: "mg", description: "Klasyczny, starszy lek antydepresyjny (TLPD)." },
   { id: 100, name: "Amiodaron", substance: "Amiodaronum", producer: "Sanofi", doses: [200], unit: "mg", description: "Jeden z najskuteczniejszych leków antyarytmicznych." },
@@ -176,21 +176,30 @@ const interactionsDb = [
   { drug1_id: 106, drug2_id: 105, type: "NEGATIVE", severity: "Wysokie", description: "Oba leki to wieloskładnikowe preparaty na przeziębienie zawierające m.in. paracetamol i substancje obkurczające naczynia. Ryzyko przedawkowania, skoków ciśnienia i tachykardii." }
 ]
 
-const MiniCalendar = ({ daysOffset, isDarkMode }) => {
-  const targetDate = new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000)
-  const targetDay = targetDate.getDate()
-  const targetMonth = targetDate.getMonth()
-  const targetYear = targetDate.getFullYear()
+const MiniCalendar = ({ med, daysOffset, isDarkMode }) => {
+  const today = new Date()
   
-  const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate()
-  let firstDayIndex = new Date(targetYear, targetMonth, 1).getDay()
-  firstDayIndex = (firstDayIndex + 6) % 7
+  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
+
+  const endDate = new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000)
+  
+  const handlePrev = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
+  const handleNext = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
+
+  const viewMonth = viewDate.getMonth()
+  const viewYear = viewDate.getFullYear()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  
+  let firstDayIndex = new Date(viewYear, viewMonth, 1).getDay()
+  firstDayIndex = (firstDayIndex + 6) % 7 
   
   const monthNames = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"]
   
   const days = []
   for (let i = 0; i < firstDayIndex; i++) days.push(null)
   for (let i = 1; i <= daysInMonth; i++) days.push(i)
+
+  const historySet = new Set(med.history || [])
 
   return (
     <motion.div 
@@ -199,17 +208,58 @@ const MiniCalendar = ({ daysOffset, isDarkMode }) => {
       exit={{ opacity: 0, height: 0 }} 
       className="overflow-hidden w-full"
     >
-      <div className={`mt-3 p-3 rounded-xl border ${isDarkMode ? 'bg-[#15202b]/80 border-gray-700' : 'bg-white border-gray-200'} shadow-sm text-sm`}>
-        <div className="font-bold text-center mb-2 text-base">{monthNames[targetMonth]} {targetYear}</div>
+      <div className={`mt-3 p-3 rounded-xl border ${isDarkMode ? 'bg-[#15202b]/80 border-gray-700' : 'bg-white border-gray-200'} shadow-sm text-sm select-none`}>
+        
+        <div className="flex justify-between items-center mb-3">
+          <button onClick={handlePrev} className={`p-1.5 rounded-md transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}>
+             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <div className="font-bold text-base">{monthNames[viewMonth]} {viewYear}</div>
+          <button onClick={handleNext} className={`p-1.5 rounded-md transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}>
+             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
+
         <div className="grid grid-cols-7 gap-1 text-center font-semibold mb-2 opacity-60 text-xs uppercase tracking-wide">
           <div>Pn</div><div>Wt</div><div>Śr</div><div>Cz</div><div>Pt</div><div>Sb</div><div>Nd</div>
         </div>
+        
         <div className="grid grid-cols-7 gap-1 text-center">
-          {days.map((d, i) => (
-            <div key={i} className={`py-1.5 rounded-md flex items-center justify-center transition-colors ${d === targetDay ? 'bg-[#20602C] text-white font-bold shadow-md' : (d ? (isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200') : '')}`}>
-              {d || ''}
-            </div>
-          ))}
+          {days.map((d, i) => {
+            if (!d) return <div key={`empty-${i}`} />
+            
+            const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+            const isTaken = historySet.has(dateStr)
+            const isEndDate = endDate.getFullYear() === viewYear && endDate.getMonth() === viewMonth && endDate.getDate() === d
+            const isToday = today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === d
+            
+            let dayClasses = "py-1.5 rounded-md flex items-center justify-center transition-colors relative "
+            
+            if (isTaken) {
+              dayClasses += "bg-[#20602C] text-white font-bold shadow-sm "
+            } else if (isToday) {
+              dayClasses += isDarkMode ? "bg-gray-700 text-white font-bold " : "bg-gray-200 text-gray-900 font-bold "
+            } else {
+              dayClasses += isDarkMode ? "hover:bg-gray-800 " : "hover:bg-gray-100 "
+            }
+
+            return (
+              <div key={i} className={dayClasses}>
+                <span className="relative z-10">{d}</span>
+                {isEndDate && !isTaken && (
+                  <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-red-500 shadow-sm z-20"></span>
+                )}
+                {isEndDate && isTaken && (
+                  <span className="absolute bottom-0 w-full h-1 bg-red-500 rounded-b-md z-20"></span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-4 text-xs font-medium opacity-80 justify-center">
+           <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#20602C]"></span> Wzięta dawka</div>
+           <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm flex items-end justify-center"><span className="w-1.5 h-1.5 rounded-full bg-red-500"></span></span> Koniec zapasu</div>
         </div>
       </div>
     </motion.div>
@@ -389,6 +439,7 @@ function App() {
         packageSize: parseInt(newTotalPills),
         pillsPerDay: parseInt(newPillsPerDay),
         startDate: new Date().toISOString(),
+        history: [],
         isFavorite: false
       }
       setMeds([newMed, ...meds])
@@ -424,7 +475,18 @@ function App() {
 
         if (aktualnyZapas > 0) {
           localStorage.removeItem(`notified_${id}`)
-          return { ...med, totalPills: med.totalPills - 1 }
+          
+          const y = today.getFullYear()
+          const m = String(today.getMonth() + 1).padStart(2, '0')
+          const d = String(today.getDate()).padStart(2, '0')
+          const localTodayStr = `${y}-${m}-${d}`
+
+          const newHistory = med.history ? [...med.history] : []
+          if (!newHistory.includes(localTodayStr)) {
+            newHistory.push(localTodayStr)
+          }
+
+          return { ...med, totalPills: med.totalPills - 1, history: newHistory }
         }
       }
       return med
@@ -624,7 +686,7 @@ function App() {
                           </div>
                           
                           <AnimatePresence>
-                            {openCalendarId === med.id && <MiniCalendar daysOffset={dni} isDarkMode={isDarkMode} />}
+                            {openCalendarId === med.id && <MiniCalendar med={med} daysOffset={dni} isDarkMode={isDarkMode} />}
                           </AnimatePresence>
                         </div>
 
