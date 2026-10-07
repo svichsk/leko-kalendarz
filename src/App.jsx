@@ -98,7 +98,7 @@ const localDrugsDb = [
   { id: 94, name: "Allopurynol", substance: "Allopurinolum", producer: "GSK", doses: [100, 300], unit: "mg", description: "Zmniejsza produkcję kwasu moczowego w organizmie. Podstawowy lek zapobiegający nawrotom ataków dny moczanowej." },
   { id: 95, name: "Febuksostat", substance: "Febuxostatum", producer: "Menarini", doses: [80, 120], unit: "mg", description: "Nowsza alternatywa dla allopurynolu na dnę moczanową." },
   { id: 96, name: "Metotreksat", substance: "Methotrexatum", producer: "Ebewe", description: "Silny lek immunosupresyjny stosowany m.in. w RZS." },
-  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Kluzowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
+  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Kluczowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
   { id: 98, name: "Karbimazol", substance: "Carbimazolum", producer: "Amdipharm", description: "Lek stosowany w nadczynności tarczycy." },
   { id: 99, name: "Doksepina", substance: "Doxepinum", producer: "Teva", doses: [10, 25], unit: "mg", description: "Klasyczny, starszy lek antydepresyjny (TLPD)." },
   { id: 100, name: "Amiodaron", substance: "Amiodaronum", producer: "Sanofi", doses: [200], unit: "mg", description: "Jeden z najskuteczniejszych leków antyarytmicznych." },
@@ -176,6 +176,46 @@ const interactionsDb = [
   { drug1_id: 106, drug2_id: 105, type: "NEGATIVE", severity: "Wysokie", description: "Oba leki to wieloskładnikowe preparaty na przeziębienie zawierające m.in. paracetamol i substancje obkurczające naczynia. Ryzyko przedawkowania, skoków ciśnienia i tachykardii." }
 ]
 
+const MiniCalendar = ({ daysOffset, isDarkMode }) => {
+  const targetDate = new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000)
+  const targetDay = targetDate.getDate()
+  const targetMonth = targetDate.getMonth()
+  const targetYear = targetDate.getFullYear()
+  
+  const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate()
+  let firstDayIndex = new Date(targetYear, targetMonth, 1).getDay()
+  firstDayIndex = (firstDayIndex + 6) % 7
+  
+  const monthNames = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"]
+  
+  const days = []
+  for (let i = 0; i < firstDayIndex; i++) days.push(null)
+  for (let i = 1; i <= daysInMonth; i++) days.push(i)
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, height: 0 }} 
+      animate={{ opacity: 1, height: 'auto' }} 
+      exit={{ opacity: 0, height: 0 }} 
+      className="overflow-hidden w-full"
+    >
+      <div className={`mt-3 p-3 rounded-xl border ${isDarkMode ? 'bg-[#15202b]/80 border-gray-700' : 'bg-white border-gray-200'} shadow-sm text-sm`}>
+        <div className="font-bold text-center mb-2 text-base">{monthNames[targetMonth]} {targetYear}</div>
+        <div className="grid grid-cols-7 gap-1 text-center font-semibold mb-2 opacity-60 text-xs uppercase tracking-wide">
+          <div>Pn</div><div>Wt</div><div>Śr</div><div>Cz</div><div>Pt</div><div>Sb</div><div>Nd</div>
+        </div>
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {days.map((d, i) => (
+            <div key={i} className={`py-1.5 rounded-md flex items-center justify-center transition-colors ${d === targetDay ? 'bg-[#20602C] text-white font-bold shadow-md' : (d ? (isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200') : '')}`}>
+              {d || ''}
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 function App() {
   const [meds, setMeds] = useState(() => {
     const saved = localStorage.getItem('mojeLeki')
@@ -217,6 +257,7 @@ function App() {
   const [suggestedDoses, setSuggestedDoses] = useState([])
   const [expandedCards, setExpandedCards] = useState({})
   const [expandedDbCards, setExpandedDbCards] = useState({})
+  const [openCalendarId, setOpenCalendarId] = useState(null)
   const [solpadeineClicks, setSolpadeineClicks] = useState([])
 
   useEffect(() => {
@@ -564,16 +605,27 @@ function App() {
                         
                         <p className="mt-3 text-sm md:text-base font-bold opacity-90">{alert}</p>
                         
-                        <div className="mt-3 pt-3 border-t border-current/20 flex justify-between items-center text-sm md:text-base font-semibold opacity-80">
-                          <span>Wystarczy do:</span>
-                          <div className="flex items-center gap-2">
-                            <span>{dataKonca}</span>
-                            <button onClick={() => addToGoogleCalendar(med.name, dataKonca)} title="Przypomnij w Google Calendar" className={`p-1.5 rounded-lg transition-all active:scale-95 ${isDarkMode ? 'bg-[#1c2733] hover:bg-gray-700 text-blue-400' : 'bg-white hover:bg-gray-100 text-blue-600 shadow-sm'}`}>
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                            </button>
+                        <div className="mt-3 pt-3 border-t border-current/20 flex flex-col gap-2 text-sm md:text-base font-semibold opacity-80">
+                          <div className="flex justify-between items-center w-full">
+                            <span>Wystarczy do:</span>
+                            <div className="flex items-center gap-2">
+                              <button 
+                                onClick={() => setOpenCalendarId(openCalendarId === med.id ? null : med.id)}
+                                className={`px-2 py-1 rounded-lg transition-colors border ${openCalendarId === med.id ? (isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-200 border-gray-400') : 'border-transparent hover:border-current/20'}`}
+                              >
+                                {dataKonca}
+                              </button>
+                              <button onClick={() => addToGoogleCalendar(med.name, dataKonca)} title="Przypomnij w Google Calendar" className={`p-1.5 rounded-lg transition-all active:scale-95 ${isDarkMode ? 'bg-[#1c2733] hover:bg-gray-700 text-blue-400' : 'bg-white hover:bg-gray-100 text-blue-600 shadow-sm'}`}>
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </button>
+                            </div>
                           </div>
+                          
+                          <AnimatePresence>
+                            {openCalendarId === med.id && <MiniCalendar daysOffset={dni} isDarkMode={isDarkMode} />}
+                          </AnimatePresence>
                         </div>
 
                         <AnimatePresence>
