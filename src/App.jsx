@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // --- NOWE IMPORTY FIREBASE ---
-import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { signInWithRedirect, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, googleProvider } from "./firebase"; // upewnij się, że masz ten plik w folderze src!
 
 const localDrugsDb = [
@@ -184,19 +184,19 @@ const MiniCalendar = ({ med, daysOffset, isDarkMode }) => {
   const today = new Date()
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
   const endDate = new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000)
-  
+
   const handlePrev = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
   const handleNext = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
 
   const viewMonth = viewDate.getMonth()
   const viewYear = viewDate.getFullYear()
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
-  
+
   let firstDayIndex = new Date(viewYear, viewMonth, 1).getDay()
-  firstDayIndex = (firstDayIndex + 6) % 7 
-  
+  firstDayIndex = (firstDayIndex + 6) % 7
+
   const monthNames = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"]
-  
+
   const days = []
   for (let i = 0; i < firstDayIndex; i++) days.push(null)
   for (let i = 1; i <= daysInMonth; i++) days.push(i)
@@ -204,39 +204,39 @@ const MiniCalendar = ({ med, daysOffset, isDarkMode }) => {
   const historySet = new Set(med.history || [])
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, height: 0 }} 
-      animate={{ opacity: 1, height: 'auto' }} 
-      exit={{ opacity: 0, height: 0 }} 
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
       className="overflow-hidden w-full"
     >
       <div className={`mt-3 p-3 rounded-xl border ${isDarkMode ? 'bg-[#15202b]/80 border-gray-700' : 'bg-white border-gray-200'} shadow-sm text-sm select-none`}>
-        
+
         <div className="flex justify-between items-center mb-3">
           <button onClick={handlePrev} className={`p-1.5 rounded-md transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}>
-             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <div className="font-bold text-base">{monthNames[viewMonth]} {viewYear}</div>
           <button onClick={handleNext} className={`p-1.5 rounded-md transition-colors ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}>
-             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
 
         <div className="grid grid-cols-7 gap-1 text-center font-semibold mb-2 opacity-60 text-xs uppercase tracking-wide">
           <div>Pn</div><div>Wt</div><div>Śr</div><div>Cz</div><div>Pt</div><div>Sb</div><div>Nd</div>
         </div>
-        
+
         <div className="grid grid-cols-7 gap-1 text-center">
           {days.map((d, i) => {
             if (!d) return <div key={`empty-${i}`} />
-            
+
             const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
             const isTaken = historySet.has(dateStr)
             const isEndDate = endDate.getFullYear() === viewYear && endDate.getMonth() === viewMonth && endDate.getDate() === d
             const isToday = today.getFullYear() === viewYear && today.getMonth() === viewMonth && today.getDate() === d
-            
+
             let dayClasses = "py-1.5 rounded-md flex items-center justify-center transition-colors relative "
-            
+
             if (isTaken) {
               dayClasses += "bg-[#20602C] text-white font-bold shadow-sm "
             } else if (isToday) {
@@ -260,8 +260,8 @@ const MiniCalendar = ({ med, daysOffset, isDarkMode }) => {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-4 text-xs font-medium opacity-80 justify-center">
-           <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#20602C]"></span> Wzięta dawka</div>
-           <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm flex items-end justify-center"><span className="w-1.5 h-1.5 rounded-full bg-red-500"></span></span> Koniec zapasu</div>
+          <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#20602C]"></span> Wzięta dawka</div>
+          <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm flex items-end justify-center"><span className="w-1.5 h-1.5 rounded-full bg-red-500"></span></span> Koniec zapasu</div>
         </div>
       </div>
     </motion.div>
@@ -288,7 +288,7 @@ function App() {
     ("Notification" in window) ? Notification.permission : "denied"
   )
 
-  const [activeTab, setActiveTab] = useState('moje') 
+  const [activeTab, setActiveTab] = useState('moje')
   const [searchQuery, setSearchQuery] = useState('')
 
   const [intSearch1, setIntSearch1] = useState('')
@@ -300,14 +300,14 @@ function App() {
 
   const [showForm, setShowForm] = useState(false)
   const [formSearchOpen, setFormSearchOpen] = useState(false)
-  
+
   const [newName, setNewName] = useState('')
   const [newDose, setNewDose] = useState('')
   const [newUnit, setNewUnit] = useState('mg')
   const [newTotalPills, setNewTotalPills] = useState('')
   const [newPillsPerDay, setNewPillsPerDay] = useState('')
   const [editingId, setEditingId] = useState(null)
-  
+
   const [suggestedDoses, setSuggestedDoses] = useState([])
   const [expandedCards, setExpandedCards] = useState({})
   const [expandedDbCards, setExpandedDbCards] = useState({})
@@ -351,7 +351,7 @@ function App() {
         if (stats.dni <= 7 && stats.dni > 0) {
           const today = new Date().toLocaleDateString()
           const lastNotified = localStorage.getItem(`notified_${med.id}`)
-          
+
           if (lastNotified !== today) {
             new Notification("LEKalendarz - przypomnienie", {
               body: `Kończy Ci się lek ${med.name}. Zostało na ${stats.dni} dni. Czas załatwić receptę.`,
@@ -366,7 +366,7 @@ function App() {
 
   const handleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      await signInWithRedirect(auth, googleProvider);
     } catch (error) {
       console.error("Błąd podczas logowania: ", error);
     }
@@ -402,8 +402,8 @@ function App() {
     const start = new Date(med.startDate)
     const today = new Date()
     const daysPassed = Math.floor((today - start) / (1000 * 60 * 60 * 24))
-    const safeDaysPassed = daysPassed > 0 ? daysPassed : 0 
-    
+    const safeDaysPassed = daysPassed > 0 ? daysPassed : 0
+
     const pillsTaken = safeDaysPassed * med.pillsPerDay
     const pillsLeft = med.totalPills - pillsTaken > 0 ? med.totalPills - pillsTaken : 0
     const daysLeft = Math.floor(pillsLeft / med.pillsPerDay)
@@ -412,10 +412,10 @@ function App() {
   }
 
   const toggleCard = (id) => setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }))
-  
+
   const handleDbCardClick = (id, drugName) => {
     setExpandedDbCards(prev => ({ ...prev, [id]: !prev[id] }))
-    
+
     if (drugName && drugName.toLowerCase() === 'solpadeine') {
       const now = Date.now()
       setSolpadeineClicks(prev => {
@@ -443,7 +443,7 @@ function App() {
   }
 
   const handleSaveMed = (e) => {
-    e.preventDefault() 
+    e.preventDefault()
     if (!newName || !newTotalPills || !newPillsPerDay) return
 
     if (editingId) {
@@ -458,7 +458,7 @@ function App() {
       } : med))
     } else {
       const newMed = {
-        id: Date.now(), 
+        id: Date.now(),
         name: newName,
         dose: newDose,
         unit: newUnit,
@@ -496,13 +496,13 @@ function App() {
         const start = new Date(med.startDate)
         const today = new Date()
         const daysPassed = Math.floor((today - start) / (1000 * 60 * 60 * 24))
-        const safeDaysPassed = daysPassed > 0 ? daysPassed : 0 
+        const safeDaysPassed = daysPassed > 0 ? daysPassed : 0
         const pillsTaken = safeDaysPassed * med.pillsPerDay
         const aktualnyZapas = med.totalPills - pillsTaken
 
         if (aktualnyZapas > 0) {
           localStorage.removeItem(`notified_${id}`)
-          
+
           const y = today.getFullYear()
           const m = String(today.getMonth() + 1).padStart(2, '0')
           const d = String(today.getDate()).padStart(2, '0')
@@ -589,7 +589,7 @@ function App() {
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-500 font-sans ${isDarkMode ? 'bg-[#15202b] text-gray-100' : 'bg-gray-100 text-gray-800'}`}>
       <div className="flex-grow p-4 md:p-8 max-w-7xl mx-auto relative pb-24 w-full">
-        
+
         <header className={`sticky top-0 z-40 py-4 -mx-4 px-4 md:-mx-8 md:px-8 mb-4 flex items-center gap-4 transition-all duration-500 backdrop-blur-xl border-b shadow-sm ${isDarkMode ? 'bg-[#15202b]/50 border-gray-700/50' : 'bg-white/50 border-white/60'}`}>
           <img src="/logo.jpg" alt="Logo LEKalendarz" className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover shadow-md shrink-0" />
           <div>
@@ -617,7 +617,7 @@ function App() {
               </div>
             ) : (
               <button onClick={handleLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm shadow-sm transition-all active:scale-95 bg-white text-gray-800 border border-gray-200 hover:bg-gray-50">
-                <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
                 <span className="hidden sm:block">Google</span>
               </button>
             )}
@@ -648,7 +648,7 @@ function App() {
             </button>
           ))}
         </div>
-        
+
         {activeTab === 'moje' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             {notificationPermission !== "granted" && (
@@ -672,11 +672,11 @@ function App() {
                     const { dni, zapas } = getMedStats(med)
                     const dataKonca = new Date(Date.now() + dni * 24 * 60 * 60 * 1000).toLocaleDateString('pl-PL')
                     const isExpanded = expandedCards[med.id]
-                    
+
                     let kolor = isDarkMode ? "bg-[#20602C]/20 border-[#20602C] text-gray-300" : "bg-green-100 border-[#20602C] text-gray-900"
                     let alert = "Zapas jest wystarczający"
                     let btnAkcja = "bg-[#20602C] hover:bg-[#184821] text-white"
-                    
+
                     if (dni < 3) {
                       kolor = isDarkMode ? "bg-red-900/20 border-red-600 text-red-400" : "bg-red-100 border-red-500 text-red-900"
                       alert = "Krytycznie mało! Zamów receptę."
@@ -697,27 +697,27 @@ function App() {
                           </button>
                           <button onClick={() => handleEdit(med)} className="text-xs md:text-sm font-bold uppercase tracking-wider opacity-60 hover:opacity-100 transition-opacity">Edytuj</button>
                         </div>
-                        
+
                         <button onClick={() => handleDelete(med.id)} className="absolute top-2 right-4 text-2xl font-bold opacity-50 hover:opacity-100 transition-opacity leading-none">×</button>
-                        
+
                         <div className="flex justify-between items-end pr-2 mt-8 md:mt-10 gap-2 flex-grow">
                           <h2 className="text-xl md:text-2xl font-bold leading-tight mb-1">
                             {med.name} {med.dose && <span className="opacity-80 font-semibold">{med.dose}{med.unit}</span>}
                           </h2>
-                          
+
                           <div className="text-right min-w-[3.5rem]">
                             <span className="text-4xl md:text-5xl font-black block leading-none">{dni}</span>
                             <span className="text-xs md:text-sm uppercase font-bold opacity-80 mt-1 block">Dni</span>
                           </div>
                         </div>
-                        
+
                         <p className="mt-3 text-sm md:text-base font-bold opacity-90">{alert}</p>
-                        
+
                         <div className="mt-3 pt-3 border-t border-current/20 flex flex-col gap-2 text-sm md:text-base font-semibold opacity-80">
                           <div className="flex justify-between items-center w-full">
                             <span>Wystarczy do:</span>
                             <div className="flex items-center gap-2">
-                              <button 
+                              <button
                                 onClick={() => setOpenCalendarId(openCalendarId === med.id ? null : med.id)}
                                 className={`px-2 py-1 rounded-lg transition-colors border ${openCalendarId === med.id ? (isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-200 border-gray-400') : 'border-transparent hover:border-current/20'}`}
                               >
@@ -730,7 +730,7 @@ function App() {
                               </button>
                             </div>
                           </div>
-                          
+
                           <AnimatePresence>
                             {openCalendarId === med.id && <MiniCalendar med={med} daysOffset={dni} isDarkMode={isDarkMode} />}
                           </AnimatePresence>
@@ -744,7 +744,7 @@ function App() {
                                   <div><span className="block text-xs uppercase font-bold opacity-70">W zapasie</span><span className="font-bold">{zapas} szt.</span></div>
                                   <div className="text-right"><span className="block text-xs uppercase font-bold opacity-70">Dawkowanie</span><span className="font-bold">{med.pillsPerDay} / dobę</span></div>
                                 </div>
-                                
+
                                 <div className="flex gap-2">
                                   <button onClick={() => handleTakePill(med.id)} className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm shadow-sm active:scale-95 transition-all text-center border ${isDarkMode ? 'bg-[#1c2733]/80 hover:bg-[#1c2733] border-current/20 text-current' : 'bg-white/70 hover:bg-white text-gray-900 border-gray-300/50'}`}>
                                     Wzięta dawka
@@ -763,7 +763,7 @@ function App() {
                             </motion.div>
                           )}
                         </AnimatePresence>
-                        
+
                         <button onClick={() => toggleCard(med.id)} className="w-full mt-3 pt-2 text-xs md:text-sm font-bold uppercase tracking-wider opacity-60 hover:opacity-100 text-center">
                           {isExpanded ? "Zwiń szczegóły" : "Rozwiń szczegóły"}
                         </button>
@@ -896,7 +896,7 @@ function App() {
                         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className={`absolute w-full mt-2 rounded-xl shadow-xl border overflow-hidden z-50 max-h-48 overflow-y-auto ${isDarkMode ? 'bg-[#1c2733] border-gray-700' : 'bg-white border-gray-200'}`}>
                           {formSearchResults.length > 0 ? (
                             formSearchResults.map(d => (
-                              <div key={d.id} onMouseDown={() => { setNewName(d.name); setFormSearchOpen(false); if(d.doses) { setSuggestedDoses(d.doses); setNewUnit(d.unit || 'mg'); } else { setSuggestedDoses([]); } }} className={`p-3 cursor-pointer border-b last:border-b-0 transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-[#22303f]' : 'border-gray-100 hover:bg-gray-50'}`}>
+                              <div key={d.id} onMouseDown={() => { setNewName(d.name); setFormSearchOpen(false); if (d.doses) { setSuggestedDoses(d.doses); setNewUnit(d.unit || 'mg'); } else { setSuggestedDoses([]); } }} className={`p-3 cursor-pointer border-b last:border-b-0 transition-colors ${isDarkMode ? 'border-gray-700 hover:bg-[#22303f]' : 'border-gray-100 hover:bg-gray-50'}`}>
                                 <div className="font-bold">{d.name}</div>
                                 <div className="text-xs opacity-60">{d.substance}</div>
                               </div>
@@ -925,7 +925,7 @@ function App() {
                         </select>
                       </div>
                     </div>
-                    
+
                     <AnimatePresence>
                       {suggestedDoses.length > 0 && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex flex-wrap gap-2 overflow-hidden">
