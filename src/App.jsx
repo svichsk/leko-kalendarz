@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// --- NOWE IMPORTY FIREBASE ---
+import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { auth, googleProvider } from "./firebase"; // upewnij się, że masz ten plik w folderze src!
+
 const localDrugsDb = [
   { id: 1, name: "Paracetamol", substance: "Paracetamolum", producer: "Różni producenci", doses: [500, 1000], unit: "mg", description: "Lek o działaniu przeciwbólowym i przeciwgorączkowym. Nie wykazuje działania przeciwzapalnego. Bezpieczny dla żołądka." },
   { id: 2, name: "Ibuprofen", substance: "Ibuprofenum", producer: "Różni producenci", doses: [200, 400, 600], unit: "mg", description: "Niesteroidowy lek przeciwzapalny (NLPZ). Działa przeciwzapalnie, przeciwbólowo i przeciwgorączkowo." },
@@ -24,7 +28,7 @@ const localDrugsDb = [
   { id: 20, name: "Lewofloksacyna", substance: "Levofloxacinum", producer: "Sanofi", doses: [250, 500], unit: "mg", description: "Silny fluorochinolon stosowany w zapaleniach płuc i powikłanych zakażeniach dróg moczowych." },
   { id: 21, name: "Bisoprolol", substance: "Bisoprololum", producer: "Merck", doses: [2.5, 5, 10], unit: "mg", description: "Kardioselektywny beta-bloker. Zwalnia rytm serca i obniża ciśnienie tętnicze." },
   { id: 22, name: "Metoprolol", substance: "Metoprololum", producer: "AstraZeneca", doses: [25, 50, 100], unit: "mg", description: "Beta-bloker. Zapobiega bólom dławicowym, obniża ciśnienie i reguluje rytm serca po zawale." },
-  { id: 23, name: "Nebiwolol", substance: "Nebivololum", producer: "Berlin-Chemie", doses: [5], unit: "mg", description: "Nowoczesny beta-bloker, który dodatkowo rozszerza naczynia krwionośne." },
+  { id: 23, name: "Nebiwolol", substance: "Nebivololum", producer: "Berlin-Chemie", doses: [5], unit: "mg", description: "Nowoczes beta-bloker, który dodatkowo rozszerza naczynia krwionośne." },
   { id: 24, name: "Amlodypina", substance: "Amlodipinum", producer: "Pfizer", doses: [5, 10], unit: "mg", description: "Bloker kanału wapniowego. Rozkurcza naczynia krwionośne, skutecznie obniżając ciśnienie." },
   { id: 25, name: "Ramipryl", substance: "Ramiprilum", producer: "Sanofi", doses: [2.5, 5, 10], unit: "mg", description: "Lek z grupy inhibitorów ACE. Podstawowy lek w nadciśnieniu i niewydolności serca." },
   { id: 26, name: "Peryndopryl", substance: "Perindoprilum", producer: "Servier", doses: [4, 5, 8, 10], unit: "mg", description: "Inhibitor konwertazy angiotensyny (ACEI). Chroni naczynia krwionośne, zapobiega powikłaniom sercowo-naczyniowym." },
@@ -98,7 +102,7 @@ const localDrugsDb = [
   { id: 94, name: "Allopurynol", substance: "Allopurinolum", producer: "GSK", doses: [100, 300], unit: "mg", description: "Zmniejsza produkcję kwasu moczowego w organizmie. Podstawowy lek zapobiegający nawrotom ataków dny moczanowej." },
   { id: 95, name: "Febuksostat", substance: "Febuxostatum", producer: "Menarini", doses: [80, 120], unit: "mg", description: "Nowsza alternatywa dla allopurynolu na dnę moczanową." },
   { id: 96, name: "Metotreksat", substance: "Methotrexatum", producer: "Ebewe", description: "Silny lek immunosupresyjny stosowany m.in. w RZS." },
-  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Kluzowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
+  { id: 97, name: "Kwas foliowy", substance: "Acidum folicum", producer: "Polfa", doses: [5, 15], unit: "mg", description: "Kluczowa w ciąży do rozwoju cewy nerwowej u płodu oraz podczas kuracji metotreksatem." },
   { id: 98, name: "Karbimazol", substance: "Carbimazolum", producer: "Amdipharm", description: "Lek stosowany w nadczynności tarczycy." },
   { id: 99, name: "Doksepina", substance: "Doxepinum", producer: "Teva", doses: [10, 25], unit: "mg", description: "Klasyczny, starszy lek antydepresyjny (TLPD)." },
   { id: 100, name: "Amiodaron", substance: "Amiodaronum", producer: "Sanofi", doses: [200], unit: "mg", description: "Jeden z najskuteczniejszych leków antyarytmicznych." },
@@ -178,9 +182,7 @@ const interactionsDb = [
 
 const MiniCalendar = ({ med, daysOffset, isDarkMode }) => {
   const today = new Date()
-  
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
-
   const endDate = new Date(Date.now() + daysOffset * 24 * 60 * 60 * 1000)
   
   const handlePrev = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
@@ -275,6 +277,8 @@ function App() {
     return []
   })
 
+  const [user, setUser] = useState(null)
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('lekoDarkMode')
     return saved ? JSON.parse(saved) : false
@@ -324,6 +328,13 @@ function App() {
   }, [isDarkMode])
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const found = fullLocalDrugsDb.find(d => d.name.toLowerCase() === newName.trim().toLowerCase());
     if (found && found.doses) {
       setSuggestedDoses(found.doses);
@@ -331,7 +342,7 @@ function App() {
     } else {
       setSuggestedDoses([]);
     }
-  }, [newName])
+  }, [newName, newDose])
 
   useEffect(() => {
     if (notificationPermission === "granted") {
@@ -352,6 +363,22 @@ function App() {
       })
     }
   }, [meds, notificationPermission])
+
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error("Błąd podczas logowania: ", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Błąd podczas wylogowywania: ", error);
+    }
+  };
 
   const requestNotifications = () => {
     if ("Notification" in window) {
@@ -576,6 +603,25 @@ function App() {
                 Włącz powiadomienia
               </button>
             )}
+
+            {user ? (
+              <div className="flex items-center gap-2 md:gap-3 bg-white/10 p-1 pr-3 md:p-1.5 md:pr-4 rounded-full border border-current/10">
+                <img src={user.photoURL} alt="Avatar" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shadow-sm" />
+                <div className="hidden md:block text-sm">
+                  <p className="font-bold leading-none mb-0.5">{user.displayName.split(' ')[0]}</p>
+                  <button onClick={handleLogout} className="text-xs opacity-70 hover:opacity-100 uppercase tracking-wider font-bold text-red-500">Wyloguj</button>
+                </div>
+                <button onClick={handleLogout} className="md:hidden ml-1 p-1 opacity-70 hover:opacity-100">
+                  <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                </button>
+              </div>
+            ) : (
+              <button onClick={handleLogin} className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm shadow-sm transition-all active:scale-95 bg-white text-gray-800 border border-gray-200 hover:bg-gray-50">
+                <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <span className="hidden sm:block">Google</span>
+              </button>
+            )}
+
             <button onClick={() => setIsDarkMode(!isDarkMode)} className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm active:scale-90 ${isDarkMode ? 'bg-[#1c2733] text-yellow-400 hover:bg-[#22303f]' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
               <AnimatePresence mode="wait">
                 {isDarkMode ? (
