@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 // --- NOWE IMPORTY FIREBASE ---
 import { signInWithRedirect, signOut, onAuthStateChanged } from "firebase/auth";
-import { auth, googleProvider } from "./firebase"; // upewnij się, że masz ten plik w folderze src!
+import { doc, getDoc, setDoc } from "firebase/firestore"; // <--- NOWE
+import { auth, googleProvider, db } from "./firebase";    // <--- DODANO db
+
 
 const localDrugsDb = [
   { id: 1, name: "Paracetamol", substance: "Paracetamolum", producer: "Różni producenci", doses: [500, 1000], unit: "mg", description: "Lek o działaniu przeciwbólowym i przeciwgorączkowym. Nie wykazuje działania przeciwzapalnego. Bezpieczny dla żołądka." },
@@ -278,6 +280,7 @@ function App() {
   })
 
   const [user, setUser] = useState(null)
+  const [isCloudSyncing, setIsCloudSyncing] = useState(true) // <--- NOWE (zapobiega nadpisywaniu bazy przy starcie)
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('lekoDarkMode')
@@ -314,9 +317,7 @@ function App() {
   const [openCalendarId, setOpenCalendarId] = useState(null)
   const [solpadeineClicks, setSolpadeineClicks] = useState([])
 
-  useEffect(() => {
-    localStorage.setItem('mojeLeki', JSON.stringify(meds))
-  }, [meds])
+
 
   useEffect(() => {
     localStorage.setItem('lekoDarkMode', JSON.stringify(isDarkMode))
@@ -328,11 +329,43 @@ function App() {
   }, [isDarkMode])
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const docSnap = await getDoc(userDocRef);
+
+          if (docSnap.exists() && docSnap.data().meds) {
+            setMeds(docSnap.data().meds);
+          } else if (meds.length > 0) {
+            await setDoc(userDocRef, { meds: meds }, { merge: true });
+          }
+        } catch (error) {
+          console.error("Błąd pobierania danych z Firebase:", error);
+        }
+      }
+      setIsCloudSyncing(false);
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('mojeLeki', JSON.stringify(meds))
+
+    if (user && !isCloudSyncing) {
+      const saveToCloud = async () => {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          await setDoc(userDocRef, { meds: meds }, { merge: true });
+        } catch (error) {
+          console.error("Błąd zapisu w chmurze:", error);
+        }
+      };
+      saveToCloud();
+    }
+  }, [meds, user, isCloudSyncing])
 
   useEffect(() => {
     const found = fullLocalDrugsDb.find(d => d.name.toLowerCase() === newName.trim().toLowerCase());
